@@ -1,0 +1,8 @@
+{
+  "name": "ExamNexus",
+  "description": "Smart Evaluation and Assessment Portal configured with interactive exam challenges, custom course passcodes, secure session lock tracking, real-time feedback, detailed mistake review panels, and printable attainment certificates.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
