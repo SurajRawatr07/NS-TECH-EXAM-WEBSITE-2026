@@ -48,7 +48,8 @@ import {
   QrCode,
   Sparkles,
   ExternalLink,
-  ChevronDown
+  ChevronDown,
+  Home
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { questions, Question } from './data/questions';
@@ -177,6 +178,40 @@ class SyntheticSoundService {
       osc2.stop(now + 1.0);
     } catch {}
   }
+
+  playHeartbeat() {
+    if (!this.enabled) return;
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      // Dub-dub heartbeat sound: first beat (low)
+      const osc1 = this.ctx.createOscillator();
+      const gain1 = this.ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(55, now);
+      osc1.frequency.exponentialRampToValueAtTime(10, now + 0.15);
+      gain1.gain.setValueAtTime(0.25, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      osc1.connect(gain1);
+      gain1.connect(this.ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.15);
+
+      // Second beat (slightly higher pitch) after 0.22 seconds
+      const osc2 = this.ctx.createOscillator();
+      const gain2 = this.ctx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(58, now + 0.22);
+      osc2.frequency.exponentialRampToValueAtTime(10, now + 0.22 + 0.18);
+      gain2.gain.setValueAtTime(0.22, now + 0.22);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.22 + 0.18);
+      osc2.connect(gain2);
+      gain2.connect(this.ctx.destination);
+      osc2.start(now + 0.22);
+      osc2.stop(now + 0.22 + 0.18);
+    } catch {}
+  }
 }
 
 const synthSvc = new SyntheticSoundService();
@@ -239,6 +274,8 @@ export default function App() {
   const [isReviewMode, setIsReviewMode] = useState(false);
   const [warnings, setWarnings] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
+  const [isDrumrollActive, setIsDrumrollActive] = useState(false);
   
   const [isResumingExam, setIsResumingExam] = useState(false);
   const [isPortrait, setIsPortrait] = useState(true);
@@ -384,10 +421,10 @@ export default function App() {
   // Loading portal cinematic animation bootseq
   useEffect(() => {
     if (isLoaderBooting) {
-      const intervalSec = 30;
+      const intervalSec = 100;
       let durationLoaded = 0;
       const interval = setInterval(() => {
-        durationLoaded += Math.floor(Math.random() * 5) + 2;
+        durationLoaded += Math.floor(Math.random() * 3) + 2;
         if (durationLoaded >= 100) {
           durationLoaded = 100;
           clearInterval(interval);
@@ -583,7 +620,15 @@ export default function App() {
   useEffect(() => {
     if (activeTab === 'exam' && examStep === 'quiz') {
       totalTimerRef.current = setInterval(() => {
-        setTotalTimeTaken(prev => prev + 1);
+        setTotalTimeTaken(prev => {
+          const nextVal = prev + 1;
+          const timeLeft = EXAM_TOTAL_LIMIT_SEC - nextVal;
+          if (timeLeft <= 300 && timeLeft > 0) {
+            // Heartbeat audio synthesized on each tick
+            synthSvc.playHeartbeat();
+          }
+          return nextVal;
+        });
       }, 1000);
     } else {
       if (totalTimerRef.current) clearInterval(totalTimerRef.current);
@@ -618,12 +663,10 @@ export default function App() {
       setCurrentQuestionIndex(0);
       setAnswers({});
       setWarnings(0);
-      setExamStep('quiz');
-      triggerInstantToast(`Access Granted! Welcome ${userData.name}`, "success");
       
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      }
+      // Open the gorgeous cinematic welcome popup
+      setShowWelcomePopup(true);
+      triggerInstantToast(`Secure credentials verified for ${userData.name}!`, "success");
     }
   };
 
@@ -673,17 +716,39 @@ export default function App() {
         
         setScore(finalTalliedScore);
         setExamStep('result');
-        triggerInstantToast("Holographic score verification finalized!", "success");
+        setIsDrumrollActive(true);
+        triggerInstantToast("Holographic core evaluations submitted...", "info");
         
-        const accuracyRate = (finalTalliedScore / currentExamQuestions.length) * 100;
-        if (accuracyRate >= 90) {
+        let tickTimes = 0;
+        const drumInterval = setInterval(() => {
+          synthSvc.playTick();
+          tickTimes++;
+          if (tickTimes >= 12) {
+            clearInterval(drumInterval);
+          }
+        }, 120);
+
+        setTimeout(() => {
+          setIsDrumrollActive(false);
+          triggerInstantToast("Grade calculations assembled!", "success");
+          
+          const accuracyPercent = (finalTalliedScore / currentExamQuestions.length) * 100;
+          let confColors = ['#00d2ff', '#3b82f6', '#ffffff']; // Low score (blue)
+          if (accuracyPercent >= 90) {
+            confColors = ['#ffd700', '#f59e0b', '#d97706']; // High score (gold)
+          } else if (accuracyPercent >= 50) {
+            confColors = ['#a855f7', '#d946ef', '#c084fc']; // Medium score (purple)
+          }
+
           confetti({
-            particleCount: 180,
+            particleCount: 160,
             spread: 80,
-            origin: { y: 0.55 },
-            colors: ['#ffd700', '#ff007f', '#00d2ff', '#ffffff']
+            origin: { y: 0.6 },
+            colors: confColors
           });
-        }
+
+          synthSvc.playSuccess();
+        }, 1500);
       }
       setScanningProgress(count);
       if (count < 30) {
@@ -880,6 +945,10 @@ export default function App() {
     {
       q: "Is webcam required?",
       a: "No webcam is required. Security is maintained through browser-level tab visibility monitors and advanced anti-cheat features."
+    },
+    {
+      q: "How does anti-cheat work?",
+      a: "The portal monitors tab focus switches, window blurring, and prohibited standard keys on your device. Accumulating three security infractions triggers automated score compilation, ending assessment immediately."
     }
   ];
 
@@ -973,9 +1042,22 @@ export default function App() {
                 />
               </div>
               
-              <div className="flex justify-between font-mono text-xs text-white/50 mb-8 px-1">
-                <span className="animate-pulse">{bootStatusText}</span>
-                <span className="font-bold text-cyan-400">{bootProgress}%</span>
+              <div className="flex justify-between font-mono text-xs text-[#00d2ff] mb-8 px-1 select-none">
+                <div className="relative overflow-hidden min-w-[220px]">
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={bootStatusText}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 10 }}
+                      transition={{ duration: 0.15 }}
+                      className="font-bold tracking-wider uppercase text-cyan-400 drop-shadow-[0_0_8px_rgba(0,210,255,0.4)] block text-left"
+                    >
+                      {bootStatusText}
+                    </motion.span>
+                  </AnimatePresence>
+                </div>
+                <span className="font-black text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.4)]">{bootProgress}%</span>
               </div>
               
               <div className="bg-[#0b101f] border border-white/5 p-4 rounded-xl font-mono text-[10px] text-zinc-400 space-y-1 text-left relative overflow-hidden">
@@ -1031,8 +1113,8 @@ export default function App() {
       {/* Cyber/Interactive Main Header */}
       <header className="fixed top-0 left-0 right-0 z-40 bg-[#040813]/80 backdrop-blur-md border-b border-white/5 p-4 md:px-8 flex items-center justify-between no-print">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-cyan-950/40 border border-cyan-400/30 rounded-xl flex items-center justify-center shadow-lg transform hover:rotate-12 transition-transform overflow-hidden p-1">
-            <img src="https://cdn-icons-png.flaticon.com/128/9871/9871387.png" alt="Logo" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+          <div className="w-9 h-9 bg-cyan-950/40 border border-cyan-400/30 rounded-xl flex items-center justify-center shadow-md transform hover:rotate-12 transition-transform select-none">
+            <Cpu size={18} className="text-cyan-400 animate-pulse" />
           </div>
           <div className="text-left">
             <h1 className="text-sm font-black tracking-tight tracking-wider text-white uppercase sm:text-base">NS TECHNOLOGY</h1>
@@ -1088,14 +1170,15 @@ export default function App() {
                 
                 {/* Clean, high-performance interactive logo with gentle floating states */}
                 <div className="flex justify-center pb-2 select-none pointer-events-none">
-                  <motion.img 
-                    src="https://cdn-icons-png.flaticon.com/128/9871/9871387.png"
-                    alt="NS Technology Logo"
-                    referrerPolicy="no-referrer"
-                    className="w-24 h-24 sm:w-28 sm:h-28 object-contain drop-shadow-[0_0_25px_rgba(6,182,212,0.35)]"
+                  <motion.div 
                     animate={{ y: [0, -8, 0] }}
                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                  />
+                    className="relative w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center bg-gradient-to-br from-cyan-500/10 to-purple-500/10 border-2 border-cyan-400/30 rounded-full shadow-[0_0_35px_rgba(6,182,212,0.3)]"
+                  >
+                    {/* Glowing outer orbit ring */}
+                    <div className="absolute inset-0 border border-purple-500/20 rounded-full animate-spin" style={{ animationDuration: '12s' }} />
+                    <Cpu size={48} className="text-cyan-400 drop-shadow-[0_0_15px_rgba(6,182,212,0.6)] animate-pulse" />
+                  </motion.div>
                 </div>
 
                 <div className="space-y-3">
@@ -1308,8 +1391,8 @@ export default function App() {
                           <span>{questionTimeLeft}s</span>
                         </div>
                         
-                        <p className="text-[10px] sm:text-xs font-mono text-zinc-400 tracking-wider">
-                          INDEX PROGRESSION: {currentQuestionIndex + 1} OF {currentExamQuestions.length}
+                        <p className="text-[10px] sm:text-xs font-mono font-bold text-zinc-300 tracking-wider uppercase">
+                          QUESTION {currentQuestionIndex + 1} of {currentExamQuestions.length}
                         </p>
                       </div>
 
@@ -1501,15 +1584,76 @@ export default function App() {
 
               {/* Exam Step: Cyberpunk Cinematic Results Dashboard */}
               {examStep === 'result' && (
-                <div className="max-w-4xl w-full mx-auto space-y-6 text-left" id="examination-result-panel">
+                isDrumrollActive ? (
+                  <div className="max-w-md w-full mx-auto space-y-6 text-center py-12 relative z-20" id="examination-drumroll-loader">
+                    <div className="glass-card p-8 border border-cyan-500/30 shadow-[0_0_35px_rgba(6,182,212,0.15)] space-y-6 relative overflow-hidden">
+                      <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-cyan-500/10 blur-3xl text-cyan-400" />
+                      <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-purple-500/10 blur-3xl text-purple-400" />
+                      
+                      <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
+                        <div className="absolute inset-0 border-4 border-dashed border-cyan-400/40 rounded-full animate-spin" style={{ animationDuration: '3s' }} />
+                        <div className="absolute inset-2 border-2 border-dotted border-purple-500/50 rounded-full animate-spin" style={{ animationDuration: '1.5s', animationDirection: 'reverse' }} />
+                        <Trophy size={40} className="text-cyan-400 animate-bounce" />
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="text-lg font-mono font-black tracking-widest text-[#00d2ff] uppercase animate-pulse">
+                          CALIBRATING GRADE VECTORS
+                        </h3>
+                        <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest max-w-xs mx-auto leading-relaxed">
+                          Assembling blockchain hashes... Decrypting final proctor credentials... Secure cryptographic certification signature active...
+                        </p>
+                      </div>
+                      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/5 shadow-inner">
+                        <motion.div 
+                          className="h-full bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-600 shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                          initial={{ width: "0%" }}
+                          animate={{ width: "100%" }}
+                          transition={{ duration: 1.5, ease: "linear" }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="max-w-4xl w-full mx-auto space-y-6 text-left" id="examination-result-panel">
                   <div className="glass-card p-6 sm:p-10 border border-white/5 relative overflow-hidden shadow-[0_0_30px_rgba(0,210,255,0.05)] glow-border text-center">
                     {/* Inner glowing sparks depending on score */}
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full bg-opacity-20 blur-[90px]" style={{ backgroundColor: themeDetails.metaHex }} />
                     
                     <div className="space-y-4 relative z-10 mb-8">
-                      <div className="relative inline-block mx-auto">
-                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-4xl sm:text-5xl glow-border">
-                          {performance.icon}
+                      <div className="relative inline-block mx-auto select-none">
+                        {/* Interactive SVG Circular Score Ring */}
+                        <svg className="w-32 h-32 sm:w-36 sm:h-36 transform -rotate-90">
+                          {/* Inner trail track */}
+                          <circle
+                            cx="64"
+                            cy="64"
+                            r="52"
+                            className="stroke-white/10 fill-none"
+                            strokeWidth="6"
+                          />
+                          {/* Active score completion arc */}
+                          <motion.circle
+                            cx="64"
+                            cy="64"
+                            r="52"
+                            className="fill-none"
+                            stroke={themeDetails.metaHex}
+                            strokeWidth="6"
+                            strokeDasharray={2 * Math.PI * 52}
+                            initial={{ strokeDashoffset: 2 * Math.PI * 52 }}
+                            animate={{ strokeDashoffset: 2 * Math.PI * 52 * (1 - score / currentExamQuestions.length) }}
+                            transition={{ duration: 1.5, ease: "easeOut" }}
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                        {/* Centered score contents */}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <span className="text-3xl sm:text-4xl font-black tracking-tight text-white leading-none">
+                            {animatedScore}
+                          </span>
+                          <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest leading-none mt-1">
+                            OF {currentExamQuestions.length}
+                          </span>
                         </div>
                       </div>
 
@@ -1701,7 +1845,8 @@ export default function App() {
                     </AnimatePresence>
                   </div>
                 </div>
-              )}
+              )
+            )}
 
               {/* Exam Step: PRINT-READY ATTAINMENT CERTIFICATE */}
               {examStep === 'certificate' && (
@@ -1977,11 +2122,9 @@ export default function App() {
               ${activeTab === 'home' ? 'text-cyan-400 font-black' : 'text-zinc-400 hover:text-white'}`}
             id="nav-tab-home-btn"
           >
-            <img 
-              src="https://cdn-icons-png.flaticon.com/128/9871/9871387.png" 
-              className={`w-4 h-4 object-contain ${activeTab === 'home' ? 'animate-bounce drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]' : 'opacity-70'}`} 
-              alt="Home" 
-              referrerPolicy="no-referrer"
+            <Home 
+              size={16} 
+              className={`${activeTab === 'home' ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.85)] animate-bounce' : 'text-zinc-400 opacity-70'}`}
             />
             <span>HOME</span>
           </button>
@@ -2151,6 +2294,79 @@ export default function App() {
                   Confirm Transmit
                 </button>
               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal: Cinematic Welcome Popup before Exam Launches */}
+      <AnimatePresence>
+        {showWelcomePopup && (
+          <div className="fixed inset-0 z-[140] flex items-center justify-center p-4 bg-black/95 backdrop-blur-lg no-select">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -20 }}
+              transition={{ duration: 0.4, cubicBezier: [0.16, 1, 0.3, 1] }}
+              className="glass-card max-w-md w-full p-8 border border-cyan-500/40 text-center relative overflow-hidden shadow-[0_0_50px_rgba(6,182,212,0.25)] space-y-6"
+            >
+              {/* Corner accent decorations */}
+              <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-cyan-400" />
+              <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-cyan-400" />
+              <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-cyan-400" />
+              <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-cyan-400" />
+              
+              {/* Floating micro-animated launch core */}
+              <div className="relative w-20 h-20 mx-auto flex items-center justify-center bg-gradient-to-br from-cyan-500/10 to-purple-500/10 border-2 border-cyan-400/40 rounded-full shadow-[0_0_20px_rgba(6,182,212,0.2)]">
+                <motion.div
+                  className="absolute inset-0 border border-dotted border-cyan-400/50 rounded-full"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                />
+                <Sparkles size={36} className="text-cyan-400 animate-pulse" />
+              </div>
+
+              <div className="space-y-2">
+                <span className="text-[10px] font-mono font-black text-cyan-400 tracking-widest uppercase bg-cyan-500/15 border border-cyan-500/30 px-3 py-1 rounded-full">
+                  COGNITIVE GATE PASSED
+                </span>
+                <h3 className="text-2xl font-black text-white tracking-wide uppercase font-serif py-1">
+                  BEST OF LUCK, <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]">{userData.name}</span>! 🚀
+                </h3>
+                <p className="text-xs font-mono text-zinc-400 leading-relaxed max-w-sm mx-auto">
+                  Your secure environment session logs are validated. Browser containment and AI anti-cheat algorithms are now operational.
+                </p>
+              </div>
+
+              <div className="p-4 bg-white/5 border border-white/5 rounded-2xl text-left space-y-2.5 font-mono text-[10px] text-zinc-300">
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full" />
+                  <span>TOTAL QUESTIONS: <strong className="text-white">20 ITEMS</strong></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full" />
+                  <span>ALLOCATED LIMITS: <strong className="text-white">15 MINUTES TOTAL</strong></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full" />
+                  <span>PROCTOR INFRACTIONS: <strong className="text-rose-400 font-bold">3 WARNING LIMITS</strong></span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  synthSvc.playSwell();
+                  setShowWelcomePopup(false);
+                  setExamStep('quiz');
+                  if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(() => {});
+                  }
+                  triggerInstantToast("Assessment launched. Content decrypted.", "success");
+                }}
+                className="w-full py-4.5 rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 text-white font-extrabold text-xs uppercase tracking-widest transition-all hover:scale-[1.03] active:scale-[0.97] hover:shadow-[0_0_30px_rgba(6,182,212,0.4)] cursor-pointer select-none border-none outline-none"
+              >
+                Launch Assessment Matrix
+              </button>
             </motion.div>
           </div>
         )}
