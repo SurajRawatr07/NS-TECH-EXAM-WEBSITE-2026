@@ -235,6 +235,7 @@ export default function App() {
   
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [showViolationModal, setShowViolationModal] = useState(false);
   const [isReviewMode, setIsReviewMode] = useState(false);
   const [warnings, setWarnings] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -333,16 +334,35 @@ export default function App() {
     return randomizedQuestionsList.length > 0 ? randomizedQuestionsList : questions[userData.course];
   }, [randomizedQuestionsList, userData.course]);
 
-  // Interactive Question Shuffle
+  // Interactive Question Shuffle based on Difficulty and sequence
   const generateRandomShuffledSyllabus = (trackName: keyof typeof questions) => {
-    const defaultList = [...questions[trackName]];
-    // Shuffle the questions array
-    for (let u = defaultList.length - 1; u > 0; u--) {
-      const v = Math.floor(Math.random() * (u + 1));
-      [defaultList[u], defaultList[v]] = [defaultList[v], defaultList[u]];
-    }
-    // Shuffle options inside every question
-    const finishedList = defaultList.map(item => {
+    const allQuestions = [...questions[trackName]];
+    
+    // Classify by difficulty status
+    const easyQs = allQuestions.filter(q => q.difficulty === 'easy');
+    const mediumQs = allQuestions.filter(q => q.difficulty === 'medium');
+    const hardQs = allQuestions.filter(q => q.difficulty === 'hard');
+    
+    // Standard random shuffler
+    const shuffleArray = <T,>(arr: T[]): T[] => {
+      const shuffled = [...arr];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    };
+    
+    // Shuffle each block individually
+    const shuffledEasy = shuffleArray(easyQs);
+    const shuffledMedium = shuffleArray(mediumQs);
+    const shuffledHard = shuffleArray(hardQs);
+    
+    // Assemble smooth progression sequence: Easy (7) -> Medium (7) -> Hard (6)
+    const combinedList = [...shuffledEasy, ...shuffledMedium, ...shuffledHard];
+    
+    // Shuffle options inside each question
+    const finishedList = combinedList.map(item => {
       const optionsShuffled = [...item.options];
       for (let x = optionsShuffled.length - 1; x > 0; x--) {
         const y = Math.floor(Math.random() * (x + 1));
@@ -401,9 +421,10 @@ export default function App() {
         synthSvc.playAlert();
         if (nextWarn >= 3) {
           handleForceSubmit();
+          setShowViolationModal(false);
           triggerInstantToast('Exam auto-submitted by Smart Monitor due to excessive deviations', 'warning');
         } else {
-          triggerInstantToast(`[WARNING ${nextWarn}/3]: Deviating from tab windows is logged!`, 'warning');
+          setShowViolationModal(true);
         }
       }
     };
@@ -737,16 +758,16 @@ export default function App() {
     const totalQuestions = currentExamQuestions.length || 1;
     const progressPercent = Math.round((answeredCount / totalQuestions) * 100);
 
-    if (progressPercent === 0) {
-      return "AI Proctor: System loaded. Focus is your ultimate currency. Ready when you are, trainee.";
-    } else if (progressPercent < 30) {
-      return "AI Proctor: Magnificent initial response sequences. Keep maintaining this fluid mental throughput.";
-    } else if (progressPercent < 60) {
-      return "AI Proctor: Security firewall parameters stable. Your response vectors have been compiled cleanly.";
-    } else if (progressPercent < 90) {
-      return "AI Proctor: Assessment 75% analyzed. Finish strong, candidate. Neural coherence is at maximum.";
+    if (progressPercent <= 20) {
+      return "Focus Mode Activated";
+    } else if (progressPercent <= 40) {
+      return "Great Progress 🚀";
+    } else if (progressPercent <= 60) {
+      return "Keep Going 🔥";
+    } else if (progressPercent <= 80) {
+      return "Excellent Accuracy ⚡";
     } else {
-      return "AI Proctor: Every sector logged. Run audit reviews if desired before final scanning submission.";
+      return "Success is Near";
     }
   }, [answers, currentExamQuestions]);
 
@@ -1059,47 +1080,49 @@ export default function App() {
               transition={{ duration: 0.4 }}
               className="max-w-5xl w-full space-y-12 text-center"
             >
-              {/* Epic Cyberpunk Hero Headline with Aurora Animated Glows */}
-              <div className="relative py-8 md:py-16 space-y-6">
+              {/* Epic Cyberpunk Hero Headline with Aurora Animated Glows inside a Premium glassmorphic hero container */}
+              <div className="glass-card max-w-4xl mx-auto p-8 sm:p-12 md:p-16 relative overflow-hidden space-y-8 shadow-[0_0_50px_rgba(0,0,0,0.8)] border border-white/10">
                 {/* Floating Aurora Light Effect Layers */}
-                <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-cyan-500/10 blur-[130px] pointer-events-none animate-pulse" />
-                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-purple-500/10 blur-[130px] pointer-events-none animate-pulse-slow" />
+                <div className="absolute -top-12 -left-12 w-96 h-96 rounded-full bg-cyan-500/15 blur-[100px] pointer-events-none animate-pulse" />
+                <div className="absolute -bottom-12 -right-12 w-96 h-96 rounded-full bg-purple-500/15 blur-[100px] pointer-events-none animate-pulse-slow" />
                 
                 {/* Clean, high-performance interactive logo with gentle floating states */}
-                <div className="flex justify-center pb-4 select-none pointer-events-none">
+                <div className="flex justify-center pb-2 select-none pointer-events-none">
                   <motion.img 
                     src="https://cdn-icons-png.flaticon.com/128/9871/9871387.png"
                     alt="NS Technology Logo"
                     referrerPolicy="no-referrer"
-                    className="w-24 h-24 sm:w-32 sm:h-32 object-contain drop-shadow-[0_0_25px_rgba(6,182,212,0.35)]"
+                    className="w-24 h-24 sm:w-28 sm:h-28 object-contain drop-shadow-[0_0_25px_rgba(6,182,212,0.35)]"
                     animate={{ y: [0, -8, 0] }}
                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                   />
                 </div>
 
-                <span className="bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-mono font-bold tracking-widest uppercase px-4 py-1.5 rounded-full inline-flex gap-2 items-center mx-auto shadow-md">
-                  <Cpu size={12} className="animate-spin" style={{ animationDuration: '4s' }} /> ADVANCED COGNITIVE ASSESSMENT PLATFORM
-                </span>
-
-                <h1 className="text-4xl sm:text-6xl md:text-8xl font-black tracking-tighter text-white leading-tight uppercase">
-                  NS TECHNOLOGY <br />
-                  <span className="bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-500 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(6,182,212,0.3)]">
-                    AI EXAMINATION PORTAL
+                <div className="space-y-3">
+                  <span className="bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-mono font-bold tracking-widest uppercase px-4 py-1.5 rounded-full inline-flex gap-2 items-center mx-auto shadow-md">
+                    <Cpu size={12} className="animate-spin" style={{ animationDuration: '4s' }} /> ADVANCED COGNITIVE ASSESSMENT PLATFORM
                   </span>
-                </h1>
 
-                <p className="max-w-3xl mx-auto text-lg sm:text-xl text-cyan-400 font-bold tracking-wide uppercase">
-                  Secure • Intelligent • Futuristic Learning Experience
-                </p>
+                  <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-tight uppercase">
+                    NS TECHNOLOGY <br />
+                    <span className="bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-500 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(6,182,212,0.3)]">
+                      AI EXAMINATION PORTAL
+                    </span>
+                  </h1>
 
-                <div className="h-8 max-w-2xl mx-auto flex items-center justify-center font-mono text-xs sm:text-sm text-zinc-400 tracking-wider">
+                  <p className="max-w-2xl mx-auto text-base sm:text-lg text-cyan-400 font-bold tracking-wide uppercase">
+                    Secure • Intelligent • Futuristic Online Examination Experience
+                  </p>
+                </div>
+
+                <div className="h-8 max-w-xl mx-auto flex items-center justify-center font-mono text-xs text-zinc-400 tracking-wider">
                   <span className="border-r-2 border-cyan-400 pr-1.5 animate-pulse text-white/90">
                     STATUS: {typingText || "INITIALIZING SYLLABUS GATEWAY..."}
                   </span>
                 </div>
 
-                <p className="max-w-3xl mx-auto text-sm sm:text-base text-zinc-400 font-medium leading-relaxed font-sans">
-                  A next-generation AI-powered examination platform designed for secure online assessments, advanced analytics, anti-cheat monitoring, and immersive learning experiences.
+                <p className="max-w-2xl mx-auto text-sm sm:text-base text-zinc-400 font-medium leading-relaxed font-sans">
+                  A modern AI-powered examination platform with secure assessments, smart analytics, anti-cheat protection, and immersive user experience.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
@@ -1109,10 +1132,20 @@ export default function App() {
                       setActiveTab('exam');
                       setExamStep('gate');
                     }}
-                    className="w-full sm:w-auto px-10 py-4 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 text-white text-xs uppercase tracking-widest font-black shadow-[0_0_30px_rgba(6,182,212,0.45)] transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 cursor-pointer border border-cyan-400/30"
+                    className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 text-white text-xs uppercase tracking-widest font-black shadow-[0_0_30px_rgba(6,182,212,0.45)] transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 cursor-pointer border border-cyan-400/30"
                     id="cta-start-exam"
                   >
-                    Start Secured Exam <Zap size={16} />
+                    Start Exam <Zap size={14} />
+                  </button>
+                  <button 
+                    onClick={() => {
+                      synthSvc.playClick();
+                      setActiveTab('faq');
+                    }}
+                    className="w-full sm:w-auto px-8 py-3.5 rounded-xl border border-white/10 hover:border-cyan-500/35 hover:bg-cyan-500/5 text-zinc-300 hover:text-white text-xs uppercase tracking-widest font-black transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                    id="cta-explore-portal"
+                  >
+                    Explore Portal <ChevronRight size={14} />
                   </button>
                 </div>
               </div>
@@ -1198,10 +1231,10 @@ export default function App() {
                               synthSvc.playClick();
                               setShowPassword(!showPassword);
                             }}
-                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors focus:outline-none cursor-pointer p-1.5 flex items-center justify-center rounded-lg hover:bg-white/5"
+                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-cyan-400 transition-all duration-200 focus:outline-none cursor-pointer p-1.5 flex items-center justify-center rounded-lg hover:bg-white/5 active:scale-90"
                             title={showPassword ? "Mask Passcode" : "Unmask Passcode"}
                           >
-                            {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                            {showPassword ? <EyeOff size={15} className="transition-transform duration-300 rotate-180" /> : <Eye size={15} className="transition-transform duration-300" />}
                           </button>
                         </div>
                       </div>
@@ -1296,10 +1329,21 @@ export default function App() {
                         />
                       </div>
 
-                      {/* Interactive Live AI Proctor Status Banner */}
-                      <div className="mt-4 p-3 rounded-xl bg-cyan-500/5 border border-cyan-500/25 text-cyan-400 font-mono text-[10px] sm:text-xs font-medium uppercase tracking-wider flex items-center gap-2 animate-pulse shadow-[0_0_15px_rgba(6,182,212,0.05)]">
-                        <Sparkles size={13} className="text-cyan-400 font-bold animate-bounce" />
-                        <span>{motivationalAIMessage}</span>
+                      {/* Animated AI Motivational Message in Compact Minimal Popup Style with Neon Glow */}
+                      <div className="mt-4">
+                        <AnimatePresence mode="wait">
+                          <motion.div 
+                            key={motivationalAIMessage}
+                            initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                            transition={{ duration: 0.25 }}
+                            className="p-2.5 rounded-xl bg-cyan-950/20 border border-cyan-400/30 text-cyan-400 font-mono text-[10px] sm:text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(6,182,212,0.15)] select-none"
+                          >
+                            <Sparkles size={11} className="text-cyan-400 animate-pulse" />
+                            <span>{motivationalAIMessage}</span>
+                          </motion.div>
+                        </AnimatePresence>
                       </div>
 
                       {/* Question Text details */}
@@ -1335,16 +1379,16 @@ export default function App() {
                         <button 
                           disabled={currentQuestionIndex === 0}
                           onClick={triggerProceedPrevious}
-                          className="px-5 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-zinc-400 hover:text-white text-xs font-bold uppercase tracking-wider transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex items-center gap-2"
+                          className="px-5 py-2.5 rounded-xl border border-white/10 hover:border-cyan-500/30 hover:bg-cyan-500/5 text-zinc-400 hover:text-white text-xs font-bold uppercase tracking-wider transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex items-center gap-2"
                         >
-                          <ChevronLeft size={14} /> Previous Mode
+                          <ChevronLeft size={14} /> Previous
                         </button>
 
                         <button 
                           onClick={triggerProceedNext}
-                          className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 text-white font-black text-xs uppercase tracking-wider shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-2"
+                          className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 text-white font-black text-xs uppercase tracking-wider shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] border border-cyan-400/20 hover:border-cyan-400/50 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-2"
                         >
-                          {currentQuestionIndex === currentExamQuestions.length - 1 ? 'Go to Review' : 'Next Node'} <ChevronRight size={14} />
+                          {currentQuestionIndex === currentExamQuestions.length - 1 ? 'Submit Exam' : 'Next'} <ChevronRight size={14} />
                         </button>
                       </div>
                     </div>
@@ -1843,68 +1887,60 @@ export default function App() {
                 </div>
 
                 <motion.div 
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className="glass-card max-w-2xl w-full mx-auto p-6 sm:p-10 border border-cyan-500/20 relative overflow-hidden glow-border text-left shadow-[0_0_40px_rgba(168,85,247,0.1)]"
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  className="glass-card max-w-2xl w-full mx-auto p-8 sm:p-12 border border-cyan-500/15 relative overflow-hidden glow-border text-center shadow-[0_0_50px_rgba(6,182,212,0.05)]"
                 >
                   {/* Absolute Glowing Halos */}
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-purple-500/15 to-indigo-500/15 blur-[80px]" />
-                  <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-cyan-500/15 to-blue-500/15 blur-[80px]" />
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-cyan-500/10 to-transparent blur-[80px]" />
+                  <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-purple-500/10 to-transparent blur-[80px]" />
                   
-                  {/* Decorative corner grid or scanner overlay */}
-                  <div className="absolute top-0 left-0 w-12 h-12 border-t-2 border-l-2 border-cyan-500/40 rounded-tl-xl" />
-                  <div className="absolute bottom-0 right-0 w-12 h-12 border-b-2 border-r-2 border-purple-500/40 rounded-br-xl" />
-                  
-                  <div className="flex flex-col md:flex-row gap-8 items-center relative z-10">
-                    <div className="relative flex-shrink-0 animate-bounce" style={{ animationDuration: '6s' }}>
-                      {/* Interactive glowing circle surrounding avatar icon */}
-                      <div className="w-28 h-28 rounded-full bg-[#081024] border-2 border-dashed border-cyan-400/60 flex items-center justify-center shadow-3xl relative">
-                        <User size={48} className="text-cyan-400" />
-                        {/* Animated concentric ripples */}
-                        <div className="absolute inset-0 border border-cyan-400 rounded-full animate-ping opacity-25" style={{ animationDuration: '4s' }} />
-                        <div className="absolute -inset-2 border border-purple-500/20 rounded-full animate-pulse" />
-                      </div>
+                  {/* Decorative corners */}
+                  <div className="absolute top-0 left-0 w-8 h-8 border-t border-l border-cyan-500/30 rounded-tl-xl" />
+                  <div className="absolute bottom-0 right-0 w-8 h-8 border-b border-r border-purple-500/30 rounded-br-xl" />
+
+                  <div className="space-y-6 relative z-10">
+                    <div className="space-y-3">
+                      <span className="bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px] font-mono tracking-widest uppercase px-3.5 py-1 rounded-full inline-block">
+                        FULL STACK DEVELOPER
+                      </span>
+                      <h3 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white uppercase font-sans">
+                        Suraj Rawat
+                      </h3>
+                      <p className="text-xs text-purple-400 font-mono uppercase tracking-wider">
+                        BCA student | Graphic Era Hill University, Haldwani
+                      </p>
                     </div>
 
-                    <div className="flex-1 space-y-4 text-center md:text-left">
-                      <div>
-                        <span className="bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px] font-mono tracking-widest uppercase px-3 py-1 rounded-full inline-block mb-1">
-                          FULL STACK DEVELOPER
-                        </span>
-                        <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white font-serif">SURAJ RAWAT</h3>
-                        <p className="text-xs text-purple-400 font-mono">BCA STUDENT | GRAPHIC ERA HILL UNIVERSITY, HALDWANI</p>
-                      </div>
+                    <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-xl mx-auto font-sans font-medium">
+                      Passionate about building modern responsive web applications with professional UX, clean secure codes, and high performance.
+                    </p>
 
-                      <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-sans font-medium">
-                        Passionate about building modern responsive web applications with clean UI, smooth user experiences, and futuristic frontend design. Specialized in crafting luxury interactive user interfaces, tactile audio synthesis feedback, and deep cyber system logic frameworks.
-                      </p>
-
-                      <div className="flex flex-wrap justify-center md:justify-start gap-4 pt-1">
-                        <a 
-                          href="https://www.linkedin.com/in/suraj-rawat-30513b340" 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="flex items-center gap-2 text-xs text-zinc-300 hover:text-white bg-white/5 border border-white/10 px-3.5 py-2 rounded-xl transition-all hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:-translate-y-0.5 cursor-pointer"
-                        >
-                          <Linkedin size={14} className="text-cyan-400" /> LinkedIn <ExternalLink size={10} className="opacity-40" />
-                        </a>
-                        <a 
-                          href="https://instagram.com/surajrawat07" 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="flex items-center gap-2 text-xs text-zinc-300 hover:text-white bg-white/5 border border-white/10 px-3.5 py-2 rounded-xl transition-all hover:border-purple-400 hover:shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:-translate-y-0.5 cursor-pointer"
-                        >
-                          <Instagram size={14} className="text-pink-400" /> Instagram <ExternalLink size={10} className="opacity-40" />
-                        </a>
-                        <a 
-                          href="https://github.com" 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="flex items-center gap-2 text-xs text-zinc-300 hover:text-white bg-white/5 border border-white/10 px-3.5 py-2 rounded-xl transition-all hover:border-emerald-400 hover:shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:-translate-y-0.5 cursor-pointer"
-                        >
-                          <Github size={14} className="text-white" /> GitHub <ExternalLink size={10} className="opacity-40" />
-                        </a>
-                      </div>
+                    <div className="flex flex-wrap justify-center gap-4 pt-2">
+                      <a 
+                        href="https://github.com/SurajRawatr07" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="flex items-center gap-2 text-xs text-zinc-300 hover:text-white bg-white/5 border border-white/10 px-4 py-2.5 rounded-xl transition-all duration-200 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:-translate-y-0.5 cursor-pointer"
+                      >
+                        <Github size={14} className="text-white" /> GitHub <ExternalLink size={10} className="opacity-40" />
+                      </a>
+                      <a 
+                        href="https://www.linkedin.com/in/suraj-rawat-30513b340" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="flex items-center gap-2 text-xs text-zinc-300 hover:text-white bg-white/5 border border-white/10 px-4 py-2.5 rounded-xl transition-all duration-200 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:-translate-y-0.5 cursor-pointer"
+                      >
+                        <Linkedin size={14} className="text-cyan-400" /> LinkedIn <ExternalLink size={10} className="opacity-40" />
+                      </a>
+                      <a 
+                        href="https://instagram.com/surajrawat07" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="flex items-center gap-2 text-xs text-zinc-300 hover:text-white bg-white/5 border border-white/10 px-4 py-2.5 rounded-xl transition-all duration-200 hover:border-purple-400 hover:shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:-translate-y-0.5 cursor-pointer"
+                      >
+                        <Instagram size={14} className="text-pink-400" /> Instagram <ExternalLink size={10} className="opacity-40" />
+                      </a>
                     </div>
                   </div>
                 </motion.div>
@@ -1918,14 +1954,14 @@ export default function App() {
           4. FLOATING MOBILE-APP STYLE GLASS NAVIGATION
           ==================================================== */}
       <div 
-        className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-sm transition-all duration-300 no-print
+        className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[92%] max-w-sm transition-all duration-300 no-print
           ${scrolledNavVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}
       >
-        <div className="bg-[#040812e6] border border-white/10 backdrop-blur-2xl rounded-full px-2 py-1.5 flex justify-between items-center shadow-[0_0_30px_rgba(0,18,43,0.8)] relative">
+        <div className="bg-[#040812f2] border border-white/10 backdrop-blur-2xl rounded-full px-2.5 py-2 flex justify-between items-center shadow-[0_4px_30px_rgba(0,0,0,0.8),0_0_20px_rgba(6,182,212,0.1)] relative">
           
           {/* Active bottom slider background pill */}
           <div 
-            className="absolute h-[80%] rounded-full bg-gradient-to-r from-cyan-500/20 to-purple-600/20 border border-cyan-400/30 transition-all duration-400 shadow-[0_0_15px_rgba(6,182,212,0.15)] pointer-events-none"
+            className="absolute h-[80%] rounded-full bg-gradient-to-r from-cyan-500/15 to-purple-600/15 border border-cyan-400/20 transition-all duration-300 shadow-[0_0_15px_rgba(6,182,212,0.15)] pointer-events-none"
             style={{
               width: '30%',
               left: activeTab === 'home' ? '2.5%' : activeTab === 'exam' ? '35%' : '67.5%'
@@ -1937,11 +1973,16 @@ export default function App() {
               synthSvc.playClick();
               setActiveTab('home');
             }}
-            className={`w-[30%] py-2 text-center rounded-full font-mono text-[10px] font-bold uppercase tracking-wider transition-colors flex flex-col items-center gap-1 cursor-pointer relative z-10
-              ${activeTab === 'home' ? 'text-cyan-400 border border-white/5' : 'text-zinc-400 hover:text-white'}`}
+            className={`w-[30%] py-1.5 text-center rounded-full font-mono text-[10px] font-bold uppercase tracking-wider transition-all duration-200 flex flex-col items-center gap-1 cursor-pointer relative z-10 hover:scale-105 active:scale-95
+              ${activeTab === 'home' ? 'text-cyan-400 font-black' : 'text-zinc-400 hover:text-white'}`}
             id="nav-tab-home-btn"
           >
-            <Cpu size={14} className={activeTab === 'home' ? 'animate-bounce' : ''} />
+            <img 
+              src="https://cdn-icons-png.flaticon.com/128/9871/9871387.png" 
+              className={`w-4 h-4 object-contain ${activeTab === 'home' ? 'animate-bounce drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]' : 'opacity-70'}`} 
+              alt="Home" 
+              referrerPolicy="no-referrer"
+            />
             <span>HOME</span>
           </button>
 
@@ -1950,11 +1991,11 @@ export default function App() {
               synthSvc.playClick();
               setActiveTab('exam');
             }}
-            className={`w-[30%] py-2 text-center rounded-full font-mono text-[10px] font-bold uppercase tracking-wider transition-colors flex flex-col items-center gap-1 cursor-pointer relative z-10
-              ${activeTab === 'exam' ? 'text-purple-400 border border-white/5' : 'text-zinc-400 hover:text-white'}`}
+            className={`w-[30%] py-1.5 text-center rounded-full font-mono text-[10px] font-bold uppercase tracking-wider transition-all duration-200 flex flex-col items-center gap-1 cursor-pointer relative z-10 hover:scale-105 active:scale-95
+              ${activeTab === 'exam' ? 'text-purple-400 font-black' : 'text-zinc-400 hover:text-white'}`}
             id="nav-tab-exam-btn"
           >
-            <ShieldCheck size={14} className={activeTab === 'exam' ? 'animate-bounce' : ''} />
+            <ShieldCheck size={15} className={`${activeTab === 'exam' ? 'animate-bounce text-purple-400' : 'text-zinc-400'}`} />
             <span>EXAM</span>
           </button>
 
@@ -1963,11 +2004,11 @@ export default function App() {
               synthSvc.playClick();
               setActiveTab('faq');
             }}
-            className={`w-[30%] py-2 text-center rounded-full font-mono text-[10px] font-bold uppercase tracking-wider transition-colors flex flex-col items-center gap-1 cursor-pointer relative z-10
-              ${activeTab === 'faq' ? 'text-cyan-400 border border-white/5' : 'text-zinc-400 hover:text-white'}`}
+            className={`w-[30%] py-1.5 text-center rounded-full font-mono text-[10px] font-bold uppercase tracking-wider transition-all duration-200 flex flex-col items-center gap-1 cursor-pointer relative z-10 hover:scale-105 active:scale-95
+              ${activeTab === 'faq' ? 'text-cyan-400 font-black' : 'text-zinc-400 hover:text-white'}`}
             id="nav-tab-faq-btn"
           >
-            <MessageSquare size={14} className={activeTab === 'faq' ? 'animate-bounce' : ''} />
+            <MessageSquare size={15} className={`${activeTab === 'faq' ? 'animate-bounce text-cyan-400' : 'text-zinc-400'}`} />
             <span>FAQ</span>
           </button>
         </div>
@@ -2025,6 +2066,52 @@ export default function App() {
                 className="w-full mt-6 py-2.5 rounded-xl bg-cyan-500 text-black font-extrabold text-xs uppercase tracking-wider transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-[0_0_15px_rgba(6,182,212,0.3)]"
               >
                 Accept Guardianship Parameters
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal: Anti-cheat Violation Alert Screen */}
+      <AnimatePresence>
+        {showViolationModal && (
+          <div className="fixed inset-0 z-[140] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="glass-card p-6 sm:p-8 max-w-md w-full border border-rose-500/40 text-center glow-border shadow-[0_0_50px_rgba(239,68,68,0.3)] relative"
+            >
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-rose-500 to-transparent animate-pulse" />
+              
+              <div className="w-16 h-16 bg-rose-500/10 text-rose-400 rounded-full flex items-center justify-center mx-auto mb-5 border border-rose-500/30 shadow-[0_0_20px_rgba(239,68,68,0.2)]">
+                <ShieldAlert size={32} className="animate-bounce" />
+              </div>
+              
+              <h3 className="text-xl font-black uppercase text-white tracking-tight mb-2">
+                Window Violation Detected
+              </h3>
+              
+              <p className="text-sm text-zinc-300 leading-relaxed mb-6 font-sans">
+                Your activity has been flagged. Switching windows is strictly prohibited and recorded.
+              </p>
+
+              <div className="bg-rose-500/5 border border-rose-500/20 rounded-xl p-4 mb-6">
+                <p className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Active Violation Count</p>
+                <p className="text-3xl font-mono font-black text-rose-500 mt-1">
+                  {warnings} <span className="text-zinc-500 text-lg">/ 3</span>
+                </p>
+                <p className="text-[10px] text-zinc-500 font-mono mt-1 uppercase">Instant auto-submission occurs on the 3rd infraction.</p>
+              </div>
+
+              <button 
+                onClick={() => {
+                  synthSvc.playClick();
+                  setShowViolationModal(false);
+                }}
+                className="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs uppercase tracking-widest transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer shadow-[0_0_20px_rgba(239,68,68,0.4)] hover:shadow-[0_0_30px_rgba(239,68,68,0.6)]"
+              >
+                Acknowledge and Refocus Gaze
               </button>
             </motion.div>
           </div>
