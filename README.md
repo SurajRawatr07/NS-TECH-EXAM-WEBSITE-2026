@@ -5,11 +5,7 @@ NST EXAM PORTAL is a f
 
 ---
 
-# 🖥️ Live Website
-
-<div align="center">
-
-# 🌐 https://nstexamportal.netlify.app/
+# 🖥️ Live Webs
 
 </div>
 
