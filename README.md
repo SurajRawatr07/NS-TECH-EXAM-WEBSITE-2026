@@ -401,10 +401,3 @@ Thanks to all students, developers, and users who support and inspire modern edu
 
 # 🚀 THANK YOU FOR VISITING
 
-### Made With ❤️ By Suraj Rawat
-
-<br>
-
-<img src="https://capsule-render.vercel.app/api?type=waving&height=160&color=0:6C63FF,100:8E2DE2&section=footer"/>
-
-</div>
