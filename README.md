@@ -2,12 +2,7 @@
 
 <div align="center">
 
-<
-<br>
 
-<img src="https://readme-typing-svg.herokuapp.com?font=Poppins&weight=700&size=30&duration=3500&pause=1200&color=8B5CF6&center=true&vCenter=true&multiline=true&repeat=true&width=1000&height=120&lines=🚀+Modern+Online+Examination+Platform;🔐+Secure+%7C+Responsive+%7C+Interactive;⚡+Premium+UI+%2B+Real-Time+Exam+Experience" />
-
-<br><br>
 
 <p align="center">
 <img src="https://img.shields.io/badge/Platform-Online%20Exam%20Portal-7C3AED?style=for-the-badge&logo=googleclassroom&logoColor=white"/>
