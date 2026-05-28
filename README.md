@@ -1,20 +1,4 @@
-<!-- ========================== ULTRA PREMIUM GITHUB README ========================== -->
-
-<div align="center">
-\
-### ⚡ Smart Online Assessment Platform With Premium UI Experience
-
-<br>
-
-<a href="https://nstexamportal.netlify.app/">
-<img src="https://img.shields.io/badge/🌐_LIVE_WEBSITE-Visit_Now-8B5CF6?style=for-the-badge&logo=vercel&logoColor=white"/>
-</a>
-
-</div>
-
----
-
-
+<!
 # 🚀 About Project
 
 NST EXAM PORTAL is a futuristic and fully responsive online examination platform designed to provide a secure, smooth, and immersive assessment experience for students and institutions.
