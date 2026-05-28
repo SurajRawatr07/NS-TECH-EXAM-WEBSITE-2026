@@ -1,14 +1,7 @@
 <!-- ========================== ULTRA PREMIUM GITHUB README ========================== -->
 
 <div align="center">
-
-
-
-<p align="center">
-<img src="https://img.s\RNAME/nst-exam-portal?style=for-the-badge"/>
-<img src="https://img
-# 🎓 NST EXAM PORTAL
-
+\
 ### ⚡ Smart Online Assessment Platform With Premium UI Experience
 
 <br>
