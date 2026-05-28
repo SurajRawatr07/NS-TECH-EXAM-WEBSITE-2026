@@ -7,11 +7,7 @@ The platform combines:
 
 ---spired secure environment |
 | 📱 Responsive Design | Optimized for all devices |
-| ⚡ Fast Performance | Smooth and lightweight experience |
-| 🎨 Modern UI | Premium futuristic interface |
-| ⏳ Countdown Timer | Real-time exam timing system |
-| 🧠 Interactive Questions | Dynamic exam interactions |
-| 🌙 Dark Theme | Elegant modern visuals |
+| ⚡ Fast Performance | Smo |
 | 🚀 Smooth Animations | Advanced UI transitions |
 | 📋 Rules Verification | Exam guidelines before start |
 | 📊 Result Experience | Premium result interface |
