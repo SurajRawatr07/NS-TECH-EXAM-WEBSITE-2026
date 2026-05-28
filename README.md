@@ -5,13 +5,7 @@
 
 
 <p align="center">
-<img src="https://img.shields.io/badge/Platform-Online%20Exam%20Portal-7C3AED?style=for-the-badge&logo=googleclassroom&logoColor=white"/>
-<img src="https://img.shields.io/badge/Frontend-HTML5-orange?style=for-the-badge&logo=html5&logoColor=white"/>
-<img src="https://img.shields.io/badge/Styling-CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white"/>
-<img src="https://img.shields.io/badge/JavaScript-Functional-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black"/>
-<img src="https://img.shields.io/badge/Responsive-100%25-success?style=for-the-badge"/>
-<img src="https://img.shields.io/badge/Deployment-Netlify-00C7B7?style=for-the-badge&logo=netlify&logoColor=white"/>
-<img src="https://img.shields.io/github/stars/YOUR_USERNAME/nst-exam-portal?style=for-the-badge"/>
+<img src="https://img.s\RNAME/nst-exam-portal?style=for-the-badge"/>
 <img src="https://img.shields.io/github/forks/YOUR_USERNAME/nst-exam-portal?style=for-the-badge"/>
 <img src="https://img.shields.io/github/license/YOUR_USERNAME/nst-exam-portal?style=for-the-badge"/>
 </p>
