@@ -418,12 +418,12 @@ export default function App() {
     synthSvc.enabled = soundToggle;
   }, [soundToggle]);
 
-  // Loading portal cinematic animation bootseq (exactly 3.5 seconds)
+  // Loading portal cinematic animation bootseq (exactly 4.5 seconds)
   useEffect(() => {
     if (isLoaderBooting) {
       const timer = setTimeout(() => {
         setIsLoaderBooting(false);
-      }, 3500);
+      }, 4500);
       return () => clearTimeout(timer);
     }
   }, [isLoaderBooting]);
@@ -738,7 +738,7 @@ export default function App() {
       URL.revokeObjectURL(url);
       triggerInstantToast("Result card snapshot exported successfully! 🚀", "success");
     } catch(err) {
-      triggerInstantToast("Snapshot generation failed", "error");
+      triggerInstantToast("Snapshot generation failed", "warning");
     }
   };
 
@@ -1123,32 +1123,61 @@ export default function App() {
             </div>
 
             {/* Glowing Text Reveal Container */}
-            <div className="relative text-center max-w-2xl px-6">
-              <h1 className="text-2xl sm:text-4xl md:text-5xl font-black tracking-widest text-center text-white leading-relaxed uppercase select-none drop-shadow-[0_0_20px_rgba(0,210,255,0.65)] font-serif">
-                {"NS TECHNOLOGY EXAMINATION WEBSITE".split("").map((char, index) => (
-                  <motion.span
-                    key={index}
-                    initial={{ opacity: 0, y: 15, filter: "blur(8px)" }}
-                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                    transition={{
-                      delay: index * 0.04,
-                      duration: 0.8,
-                      ease: [0.16, 1, 0.3, 1],
-                    }}
-                    className="inline-block"
-                    style={{ whiteSpace: char === " " ? "pre" : "normal" }}
-                  >
-                    {char}
-                  </motion.span>
-                ))}
-              </h1>
+            <div className="relative text-center w-full max-w-xl px-4 flex flex-col items-center justify-center">
+              {/* Outer container shimmer for exquisite cinematic vibes */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
+                className="space-y-4 text-center sm:space-y-6 flex flex-col items-center justify-center"
+              >
+                {/* Line 1: NS TECHNOLOGY with premium motion blur entry */}
+                <h1 className="text-[7.5vw] sm:text-5xl md:text-6xl font-black tracking-[0.22em] text-white leading-none uppercase select-none drop-shadow-[0_0_25px_rgba(255,255,255,0.35)] font-serif whitespace-nowrap overflow-visible pl-4">
+                  {"NS TECHNOLOGY".split("").map((char, index) => (
+                    <motion.span
+                      key={index}
+                      initial={{ opacity: 0, scale: 0.9, filter: "blur(14px)", y: 15 }}
+                      animate={{ opacity: 1, scale: 1, filter: "blur(0px)", y: 0 }}
+                      transition={{
+                        delay: index * 0.05,
+                        duration: 1.4,
+                        ease: [0.16, 1, 0.3, 1],
+                      }}
+                      className="inline-block"
+                      style={{ whiteSpace: char === " " ? "pre" : "normal" }}
+                    >
+                      {char}
+                    </motion.span>
+                  ))}
+                </h1>
+
+                {/* Line 2: EXAM PORTAL with luxurious delayed reveal cascade */}
+                <h2 className="text-[5.5vw] sm:text-3xl md:text-4xl font-extrabold tracking-[0.28em] text-cyan-400 leading-none uppercase select-none drop-shadow-[0_0_20px_rgba(6,182,212,0.7)] font-serif whitespace-nowrap overflow-visible pl-4">
+                  {"EXAM PORTAL".split("").map((char, index) => (
+                    <motion.span
+                      key={index}
+                      initial={{ opacity: 0, scale: 0.9, filter: "blur(14px)", y: 15 }}
+                      animate={{ opacity: 1, scale: 1, filter: "blur(0px)", y: 0 }}
+                      transition={{
+                        delay: 0.7 + index * 0.05,
+                        duration: 1.4,
+                        ease: [0.16, 1, 0.3, 1],
+                      }}
+                      className="inline-block"
+                      style={{ whiteSpace: char === " " ? "pre" : "normal" }}
+                    >
+                      {char}
+                    </motion.span>
+                  ))}
+                </h2>
+              </motion.div>
 
               {/* Glowing elegant horizontal divider line */}
               <motion.div
                 initial={{ width: "0%", opacity: 0 }}
-                animate={{ width: "60%", opacity: [0, 0.6, 0] }}
-                transition={{ delay: 1.0, duration: 2.0, ease: "easeInOut" }}
-                className="h-[1px] bg-gradient-to-r from-transparent via-[#00d2ff] to-transparent mx-auto mt-6 relative shadow-[0_0_12px_#00d2ff]"
+                animate={{ width: "65%", opacity: [0, 0.75, 0] }}
+                transition={{ delay: 2.2, duration: 2.3, ease: "easeInOut" }}
+                className="h-[1.5px] bg-gradient-to-r from-transparent via-[#00d2ff] to-transparent mx-auto mt-8 relative shadow-[0_0_15px_#00d2ff]"
               />
             </div>
           </motion.div>
