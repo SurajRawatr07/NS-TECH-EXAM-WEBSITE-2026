@@ -418,34 +418,13 @@ export default function App() {
     synthSvc.enabled = soundToggle;
   }, [soundToggle]);
 
-  // Loading portal cinematic animation bootseq
+  // Loading portal cinematic animation bootseq (exactly 3.5 seconds)
   useEffect(() => {
     if (isLoaderBooting) {
-      const intervalSec = 100;
-      let durationLoaded = 0;
-      const interval = setInterval(() => {
-        durationLoaded += Math.floor(Math.random() * 3) + 2;
-        if (durationLoaded >= 100) {
-          durationLoaded = 100;
-          clearInterval(interval);
-          setTimeout(() => {
-            setIsLoaderBooting(false);
-          }, 300);
-        }
-        setBootProgress(durationLoaded);
-        
-        if (durationLoaded < 25) {
-          setBootStatusText('Initializing Secure Environment...');
-        } else if (durationLoaded < 50) {
-          setBootStatusText('Loading AI Modules...');
-        } else if (durationLoaded < 75) {
-          setBootStatusText('Verifying System Integrity...');
-        } else {
-          setBootStatusText('Access Granted');
-        }
-      }, intervalSec);
-      
-      return () => clearInterval(interval);
+      const timer = setTimeout(() => {
+        setIsLoaderBooting(false);
+      }, 3500);
+      return () => clearTimeout(timer);
     }
   }, [isLoaderBooting]);
 
@@ -690,6 +669,76 @@ export default function App() {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(prev => prev - 1);
       setQuestionTimeLeft(60);
+    }
+  };
+
+  const handleDownloadResultCard = () => {
+    synthSvc.playClick();
+    try {
+      const accuracyText = (score / currentExamQuestions.length * 100).toFixed(1);
+      const svgContent = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920" style="background: #03050a; font-family: 'Times New Roman', serif;">
+          <defs>
+            <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#00d2ff" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#a855f7" stop-opacity="0.3"/>
+            </linearGradient>
+            <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#00f0ff"/>
+              <stop offset="100%" stop-color="#7000ff"/>
+            </linearGradient>
+          </defs>
+          
+          <!-- Outer border neon -->
+          <rect x="30" y="30" width="1020" height="1860" rx="40" fill="none" stroke="url(#headerGrad)" stroke-width="6" opacity="0.8"/>
+          
+          <!-- Decorative circle background lights -->
+          <circle cx="540" cy="960" r="350" fill="url(#glow)" filter="blur(80px)"/>
+          
+          <!-- Header text -->
+          <text x="540" y="240" font-size="24" font-family="'Times New Roman', serif" fill="#00d2ff" font-weight="bold" letter-spacing="8" text-anchor="middle" opacity="0.9">NS TECHNOLOGY ASSESSMENT</text>
+          
+          <!-- Inner elegant card boundary -->
+          <rect x="100" y="340" width="880" height="1240" rx="30" fill="#0c1020" fill-opacity="0.85" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+          
+          <!-- Title text -->
+          <text x="540" y="520" font-size="52" fill="#ffffff" font-weight="900" letter-spacing="4" text-anchor="middle" font-family="'Times New Roman', serif">OFFICIAL COGNITIVE TRANSCRIPT</text>
+          
+          <line x1="200" y1="580" x2="880" y2="580" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+          
+          <!-- Candidate Nominee -->
+          <text x="540" y="680" font-size="28" fill="#888888" font-family="'Times New Roman', serif" text-anchor="middle">CANDIDATE NOMINEE</text>
+          <text x="540" y="750" font-size="56" fill="#ffffff" font-weight="bold" text-family="'Times New Roman', serif" text-anchor="middle">${userData.name || 'ANONYMOUS SPECIALIST'}</text>
+          
+          <!-- Course syllabus -->
+          <text x="540" y="860" font-size="26" fill="#888888" font-family="'Times New Roman', serif" text-anchor="middle">SYLLABUS TRACK</text>
+          <text x="540" y="920" font-size="44" fill="#00d2ff" font-weight="bold" text-family="'Times New Roman', serif" text-anchor="middle">${userData.course}</text>
+          
+          <!-- Huge Score Container -->
+          <rect x="240" y="1030" width="600" height="240" rx="20" fill="#03050a" stroke="url(#headerGrad)" stroke-width="3"/>
+          <text x="540" y="1140" font-size="80" fill="#ffffff" font-weight="900" font-family="'Times New Roman', serif" text-anchor="middle">${accuracyText}%</text>
+          <text x="540" y="1210" font-size="22" font-family="'Times New Roman', serif" fill="#888888" letter-spacing="4" text-anchor="middle">VERIFIED SCORE ACCURACY</text>
+          
+          <!-- ID Code -->
+          <text x="540" y="1380" font-size="24" font-family="'Times New Roman', serif" fill="#888e9b" text-anchor="middle">CERTIFICATE ID: ${certificateId}</text>
+          <text x="540" y="1430" font-size="20" font-family="'Times New Roman', serif" fill="#00e575" text-anchor="middle">STATUS: SECURE CREDENTIALS ENCODED</text>
+          
+          <!-- Bottom Brand info -->
+          <text x="540" y="1690" font-size="22" font-family="'Times New Roman', serif" fill="#888888" letter-spacing="2" text-anchor="middle">@2026 NS TECHNOLOGY • SYSTEM PRIVACY ASSURED</text>
+        </svg>
+      `;
+      const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `NS_TECH_RESULT_${(userData.name || 'GRAD').toUpperCase().replace(/\s+/g, '_')}.svg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      triggerInstantToast("Result card snapshot exported successfully! 🚀", "success");
+    } catch(err) {
+      triggerInstantToast("Snapshot generation failed", "error");
     }
   };
 
@@ -1021,52 +1070,86 @@ export default function App() {
           <motion.div 
             key="hacker-boot-loader"
             initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-[#03050a] z-[1000] flex flex-col items-center justify-center p-6"
+            exit={{ opacity: 0, scale: 1.05, filter: "blur(12px)" }}
+            transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-0 bg-[#030509] z-[1000] flex flex-col items-center justify-center p-6 overflow-hidden select-none"
           >
-            <div className="max-w-md w-full relative">
-              {/* Spinning hacker graphics */}
-              <div className="relative w-28 h-28 mx-auto mb-10 flex items-center justify-center">
-                <div className="absolute inset-0 border-4 border-dashed border-cyan-500/20 rounded-full animate-spin" style={{ animationDuration: '10s' }} />
-                <div className="absolute inset-2 border-2 border-dotted border-purple-500/40 rounded-full animate-spin" style={{ animationDuration: '6s', animationDirection: 'reverse' }} />
-                <Cpu size={40} className="text-cyan-400 animate-pulse" />
-              </div>
-              
-              <h2 className="text-xl sm:text-2xl font-black font-mono tracking-tighter text-center uppercase text-white mb-2">
-                ASSESS-PORTAL SETUP
-              </h2>
-              <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden border border-white/5 relative z-10 mb-4 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
-                <div 
-                  className="h-full bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-600 shadow-[0_0_10px_rgba(6,182,212,0.8)] transition-all duration-300 ease-out"
-                  style={{ width: `${bootProgress}%` }}
+            {/* Immersive Rotating Aurora Background Glimmers */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              <motion.div 
+                animate={{ rotate: 360 }}
+                transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
+                className="absolute -top-1/4 -left-1/4 w-[150%] h-[150%] opacity-40 mix-blend-screen"
+                style={{
+                  background: 'radial-gradient(circle, rgba(6,182,212,0.18) 0%, rgba(168,85,247,0.14) 30%, transparent 60%)',
+                }}
+              />
+              <motion.div 
+                animate={{ rotate: -360 }}
+                transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
+                className="absolute -bottom-1/4 -right-1/4 w-[150%] h-[150%] opacity-35 mix-blend-screen"
+                style={{
+                  background: 'radial-gradient(circle, rgba(59,130,246,0.12) 0%, rgba(217,70,239,0.1) 40%, transparent 75%)',
+                }}
+              />
+            </div>
+
+            {/* Premium Soft Background Particles */}
+            <div className="absolute inset-0 pointer-events-none opacity-25">
+              {[...Array(14)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute bg-cyan-400 rounded-full blur-[1px]"
+                  style={{
+                    width: Math.random() * 3 + 2,
+                    height: Math.random() * 3 + 2,
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    boxShadow: '0 0 8px #00d2ff',
+                  }}
+                  animate={{
+                    y: [0, -45, 0],
+                    x: [0, Math.random() * 20 - 10, 0],
+                    opacity: [0.2, 0.9, 0.2],
+                  }}
+                  transition={{
+                    duration: Math.random() * 4 + 3.5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: Math.random() * 2,
+                  }}
                 />
-              </div>
-              
-              <div className="flex justify-between font-mono text-xs text-[#00d2ff] mb-8 px-1 select-none">
-                <div className="relative overflow-hidden min-w-[220px]">
-                  <AnimatePresence mode="wait">
-                    <motion.span
-                      key={bootStatusText}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 10 }}
-                      transition={{ duration: 0.15 }}
-                      className="font-bold tracking-wider uppercase text-cyan-400 drop-shadow-[0_0_8px_rgba(0,210,255,0.4)] block text-left"
-                    >
-                      {bootStatusText}
-                    </motion.span>
-                  </AnimatePresence>
-                </div>
-                <span className="font-black text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.4)]">{bootProgress}%</span>
-              </div>
-              
-              <div className="bg-[#0b101f] border border-white/5 p-4 rounded-xl font-mono text-[10px] text-zinc-400 space-y-1 text-left relative overflow-hidden">
-                <div className="absolute right-2 top-2 w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                <p className="text-emerald-400">[OK] SECURITY CONTAINER LOADED</p>
-                <p className="text-zinc-500">[TRACE] ATTAINMENT HOOK HASH KEY ENABLED</p>
-                <p className="text-cyan-400">[BOOT] SYNTH GENERATOR CHONG RE-INDEXED</p>
-                <p className="text-zinc-500">[LOAD] RESUME BACKUP EXAM RECOVERY ONLINE</p>
-              </div>
+              ))}
+            </div>
+
+            {/* Glowing Text Reveal Container */}
+            <div className="relative text-center max-w-2xl px-6">
+              <h1 className="text-2xl sm:text-4xl md:text-5xl font-black tracking-widest text-center text-white leading-relaxed uppercase select-none drop-shadow-[0_0_20px_rgba(0,210,255,0.65)] font-serif">
+                {"NS TECHNOLOGY EXAMINATION WEBSITE".split("").map((char, index) => (
+                  <motion.span
+                    key={index}
+                    initial={{ opacity: 0, y: 15, filter: "blur(8px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    transition={{
+                      delay: index * 0.04,
+                      duration: 0.8,
+                      ease: [0.16, 1, 0.3, 1],
+                    }}
+                    className="inline-block"
+                    style={{ whiteSpace: char === " " ? "pre" : "normal" }}
+                  >
+                    {char}
+                  </motion.span>
+                ))}
+              </h1>
+
+              {/* Glowing elegant horizontal divider line */}
+              <motion.div
+                initial={{ width: "0%", opacity: 0 }}
+                animate={{ width: "60%", opacity: [0, 0.6, 0] }}
+                transition={{ delay: 1.0, duration: 2.0, ease: "easeInOut" }}
+                className="h-[1px] bg-gradient-to-r from-transparent via-[#00d2ff] to-transparent mx-auto mt-6 relative shadow-[0_0_12px_#00d2ff]"
+              />
             </div>
           </motion.div>
         )}
@@ -1168,43 +1251,68 @@ export default function App() {
                 <div className="absolute -top-12 -left-12 w-96 h-96 rounded-full bg-cyan-500/15 blur-[100px] pointer-events-none animate-pulse" />
                 <div className="absolute -bottom-12 -right-12 w-96 h-96 rounded-full bg-purple-500/15 blur-[100px] pointer-events-none animate-pulse-slow" />
                 
-                {/* Clean, high-performance interactive logo with gentle floating states */}
-                <div className="flex justify-center pb-2 select-none pointer-events-none">
-                  <motion.div 
-                    animate={{ y: [0, -8, 0] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    className="relative w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center bg-gradient-to-br from-cyan-500/10 to-purple-500/10 border-2 border-cyan-400/30 rounded-full shadow-[0_0_35px_rgba(6,182,212,0.3)]"
-                  >
-                    {/* Glowing outer orbit ring */}
-                    <div className="absolute inset-0 border border-purple-500/20 rounded-full animate-spin" style={{ animationDuration: '12s' }} />
-                    <Cpu size={48} className="text-cyan-400 drop-shadow-[0_0_15px_rgba(6,182,212,0.6)] animate-pulse" />
-                  </motion.div>
+                {/* Premium Floating Particles inside Hero Container */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-30 z-0">
+                  {[...Array(8)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="absolute w-1 rounded-full bg-cyan-400 blur-[0.5px]"
+                      style={{
+                        height: Math.random() * 3 + 2,
+                        left: `${Math.random() * 100}%`,
+                        top: `${Math.random() * 100}%`,
+                        boxShadow: '0 0 6px #00d2ff',
+                      }}
+                      animate={{
+                        y: [0, -30, 0],
+                        opacity: [0.3, 0.8, 0.3],
+                      }}
+                      transition={{
+                        duration: Math.random() * 5 + 4,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                        delay: Math.random() * 2,
+                      }}
+                    />
+                  ))}
                 </div>
 
-                <div className="space-y-3">
-                  <span className="bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-mono font-bold tracking-widest uppercase px-4 py-1.5 rounded-full inline-flex gap-2 items-center mx-auto shadow-md">
-                    <Cpu size={12} className="animate-spin" style={{ animationDuration: '4s' }} /> ADVANCED COGNITIVE ASSESSMENT PLATFORM
+                <div className="space-y-4 relative z-10">
+                  <span className="bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px] sm:text-xs font-mono font-bold tracking-[0.2em] uppercase px-4 py-1.5 rounded-full inline-block mx-auto shadow-md">
+                    ADVANCED COGNITIVE ASSESSMENT PLATFORM
                   </span>
 
-                  <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-tight uppercase">
-                    NS TECHNOLOGY <br />
-                    <span className="bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-500 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(6,182,212,0.3)]">
+                  <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-tight uppercase font-serif drop-shadow-[0_0_15px_rgba(0,210,255,0.25)]">
+                    <motion.span
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6 }}
+                      className="block"
+                    >
+                      NS TECHNOLOGY
+                    </motion.span>
+                    <motion.span
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, delay: 0.15 }}
+                      className="bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-500 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(6,182,212,0.3)] block mt-1"
+                    >
                       AI EXAMINATION PORTAL
-                    </span>
+                    </motion.span>
                   </h1>
 
-                  <p className="max-w-2xl mx-auto text-base sm:text-lg text-cyan-400 font-bold tracking-wide uppercase">
+                  <p className="max-w-2xl mx-auto text-xs sm:text-sm text-cyan-400 font-bold tracking-[0.15em] uppercase font-mono">
                     Secure • Intelligent • Futuristic Online Examination Experience
                   </p>
                 </div>
 
-                <div className="h-8 max-w-xl mx-auto flex items-center justify-center font-mono text-xs text-zinc-400 tracking-wider">
-                  <span className="border-r-2 border-cyan-400 pr-1.5 animate-pulse text-white/90">
+                <div className="h-8 max-w-xl mx-auto flex items-center justify-center font-mono text-xs text-zinc-400 tracking-wider relative z-10">
+                  <span className="border-r-2 border-cyan-400 pr-1.5 animate-pulse text-white/90 font-mono">
                     STATUS: {typingText || "INITIALIZING SYLLABUS GATEWAY..."}
                   </span>
                 </div>
 
-                <p className="max-w-2xl mx-auto text-sm sm:text-base text-zinc-400 font-medium leading-relaxed font-sans">
+                <p className="max-w-2xl mx-auto text-sm sm:text-base text-zinc-400 font-medium leading-relaxed font-serif relative z-10">
                   A modern AI-powered examination platform with secure assessments, smart analytics, anti-cheat protection, and immersive user experience.
                 </p>
 
@@ -1736,13 +1844,10 @@ export default function App() {
                         
                         <div className="flex gap-2">
                           <button 
-                            onClick={() => {
-                              synthSvc.playClick();
-                              triggerInstantToast("Result card snapshot exported to documents queue", "success");
-                            }}
-                            className="flex-1 py-2 rounded-xl bg-[#111c34] hover:bg-[#18284b] text-white font-black text-[10px] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                            onClick={handleDownloadResultCard}
+                            className="flex-1 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 text-white font-extrabold text-[10px] uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(6,182,212,0.35)] hover:scale-105 active:scale-95 border border-cyan-400/20"
                           >
-                            <Download size={12} /> Expose Image
+                            <Download size={12} /> Download Transcript SVG
                           </button>
                         </div>
                       </div>
@@ -2053,12 +2158,12 @@ export default function App() {
                         Suraj Rawat
                       </h3>
                       <p className="text-xs text-purple-400 font-mono uppercase tracking-wider">
-                        BCA student | Graphic Era Hill University, Haldwani
+                        BCA Student | Graphic Era Hill University, Haldwani
                       </p>
                     </div>
 
-                    <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-xl mx-auto font-sans font-medium">
-                      Passionate about building modern responsive web applications with professional UX, clean secure codes, and high performance.
+                    <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-xl mx-auto font-serif">
+                      Passionate about building modern responsive web applications with clean UI, smooth user experiences, and futuristic frontend design.
                     </p>
 
                     <div className="flex flex-wrap justify-center gap-4 pt-2">
@@ -2099,8 +2204,7 @@ export default function App() {
           4. FLOATING MOBILE-APP STYLE GLASS NAVIGATION
           ==================================================== */}
       <div 
-        className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[92%] max-w-sm transition-all duration-300 no-print
-          ${scrolledNavVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[92%] max-w-sm no-print"
       >
         <div className="bg-[#040812f2] border border-white/10 backdrop-blur-2xl rounded-full px-2.5 py-2 flex justify-between items-center shadow-[0_4px_30px_rgba(0,0,0,0.8),0_0_20px_rgba(6,182,212,0.1)] relative">
           
@@ -2394,7 +2498,7 @@ export default function App() {
       </div>
 
       {/* Subtle Minimal Footer copyright */}
-      <footer className="w-full py-8 mt-16 text-center text-zinc-600 font-mono text-[10px] uppercase tracking-widest no-print select-none opacity-80 hover:opacity-100 transition-opacity duration-300">
+      <footer className="w-full py-8 mt-16 text-center text-zinc-600 font-mono text-[10px] uppercase tracking-widest no-print select-none opacity-80 hover:opacity-100 transition-opacity duration-300 drop-shadow-[0_0_6px_rgba(0,210,255,0.18)]">
         @2026 NS TECHNOLOGY ALL RIGHT RESERVED
       </footer>
     </div>
