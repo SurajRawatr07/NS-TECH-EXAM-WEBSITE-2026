@@ -6,12 +6,7 @@
 
 <p align="center">
 <img src="https://img.s\RNAME/nst-exam-portal?style=for-the-badge"/>
-<img src="https://img.shields.io/github/forks/YOUR_USERNAME/nst-exam-portal?style=for-the-badge"/>
-<img src="https://img.shields.io/github/license/YOUR_USERNAME/nst-exam-portal?style=for-the-badge"/>
-</p>
-
-<br>
-
+<img src="https://img
 # 🎓 NST EXAM PORTAL
 
 ### ⚡ Smart Online Assessment Platform With Premium UI Experience
