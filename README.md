@@ -5,15 +5,7 @@ NST EXAM PORTAL is a futuristic and fully responsive online examination platform
 
 The platform combines:
 
----
-
-# ✨ Core Features
-
-<div align="center">
-
-| Feature | Description |
-|----------|-------------|
-| 🔐 Secure Exams | Anti-cheat inspired secure environment |
+---spired secure environment |
 | 📱 Responsive Design | Optimized for all devices |
 | ⚡ Fast Performance | Smooth and lightweight experience |
 | 🎨 Modern UI | Premium futuristic interface |
