@@ -17,6 +17,7 @@
   --color-computer: #a855f7; 
 }
 
+
 @layer base {
   body {
     @apply bg-dark-bg text-white min-h-screen font-sans selection:bg-neon-blue/30 transition-colors duration-500;
