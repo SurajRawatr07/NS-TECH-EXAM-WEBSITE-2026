@@ -1,59 +1,75 @@
 @import "tailwindcss";
 
 :root {
-  --background: #faf9f5;
-  --foreground: #3d3929;
-  --card: #faf9f5;
-  --primary: #c96442;
+  --background: #fdfaf4;
+  --foreground: #1a2744;
+  --card: #ffffff;
+  --card-foreground: #1a2744;
+  --primary: #171717;
   --primary-foreground: #ffffff;
-  --secondary: #e9e6dc;
-  --accent: #e9e6dc;
-  --muted: #ede9de;
-  --muted-foreground: #83827d;
-  --border: #dad9d4;
-  --ring: #c96442;
-  --destructive: #141413;
-  --radius: 0.5rem;
+  --secondary: #f5efe0;
+  --accent: #b45309;
+  --accent-light: #fef3e2;
+  --accent-foreground: #b45309;
+  --muted: #f5efe0;
+  --muted-foreground: #64748b;
+  --border: #e2dbcd;
+  --ring: #b45309;
+  --destructive: #b91c1c;
+  --radius: 0.75rem;
   --error: #b91c1c;
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #262624;
-    --foreground: #c3c0b6;
-    --card: #262624;
-    --primary: #d97757;
-    --primary-foreground: #ffffff;
-    --secondary: #faf9f5;
-    --accent: #1a1915;
-    --muted: #1b1b19;
-    --muted-foreground: #b7b5a9;
-    --border: #3e3e38;
-    --ring: #d97757;
+    --background: #17191d;
+    --foreground: #f3eee6;
+    --card: #202328;
+    --card-foreground: #f3eee6;
+    --primary: #f3eee6;
+    --primary-foreground: #17191d;
+    --secondary: #2b2f36;
+    --accent: #d97736;
+    --accent-light: #2c251d;
+    --accent-foreground: #f6ad55;
+    --muted: #272b32;
+    --muted-foreground: #94a3b8;
+    --border: #383e48;
+    --ring: #d97736;
     --destructive: #ef4444;
     --error: #ef4444;
   }
 }
 
 .dark {
-  --background: #262624;
-  --foreground: #c3c0b6;
-  --card: #262624;
-  --primary: #d97757;
-  --primary-foreground: #ffffff;
-  --secondary: #faf9f5;
-  --accent: #1a1915;
-  --muted: #1b1b19;
-  --muted-foreground: #b7b5a9;
-  --border: #3e3e38;
-  --ring: #d97757;
+  --background: #17191d;
+  --foreground: #f3eee6;
+  --card: #202328;
+  --card-foreground: #f3eee6;
+  --primary: #f3eee6;
+  --primary-foreground: #17191d;
+  --secondary: #2b2f36;
+  --accent: #d97736;
+  --accent-light: #2c251d;
+  --accent-foreground: #f6ad55;
+  --muted: #272b32;
+  --muted-foreground: #94a3b8;
+  --border: #383e48;
+  --ring: #d97736;
   --destructive: #ef4444;
   --error: #ef4444;
 }
 
 *, *::before, *::after {
-  font-family: "Times New Roman", Times, "Liberation Serif", serif !important;
+  font-family: var(--font-body);
   box-sizing: border-box;
+}
+
+h1, h2, h3, h4, .font-serif, .font-display {
+  font-family: var(--font-display) !important;
+  letter-spacing: -0.015em;
 }
 
 @layer base {
@@ -62,25 +78,29 @@
     color: var(--foreground);
     min-height: 100vh;
     font-size: 15px;
-    line-height: 1.65;
+    line-height: 1.6;
     overflow-x: hidden;
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
 @layer components {
-  /* Flat Card with 1px border and 0.5rem radius */
-  .crimson-card {
+  /* Project Era Warm Card: Crisp white on ivory background with soft border & subtle shadow */
+  .crimson-card, .era-card {
     background-color: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    box-shadow: 0 1px 3px 0 rgba(61, 57, 41, 0.04);
+    box-shadow: 0 1px 3px 0 rgba(26, 39, 68, 0.04), 0 1px 2px -1px rgba(26, 39, 68, 0.04);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
-  .crimson-card:hover {
-    border-color: var(--ring);
+  .crimson-card:hover, .era-card:hover {
+    border-color: #cbd5e1;
   }
 
-  /* Solid Primary Button */
+  /* Project Era Solid Primary Button (Neutral-900 / dark charcoal) */
   .btn-primary {
     display: inline-flex;
     align-items: center;
@@ -89,22 +109,24 @@
     padding: 0.625rem 1.25rem;
     border-radius: var(--radius);
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--primary-foreground);
     background-color: var(--primary);
     border: 1px solid var(--primary);
-    transition: filter 0.15s ease, transform 0.1s ease;
+    font-family: var(--font-body);
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
   }
 
   .btn-primary:hover {
-    filter: brightness(0.92);
+    background-color: #262626;
+    border-color: #262626;
   }
 
   .btn-primary:active {
     transform: scale(0.98);
   }
 
-  /* Outline Secondary Button */
+  /* Project Era Secondary Button (Clean white background with soft border) */
   .btn-secondary {
     display: inline-flex;
     align-items: center;
@@ -113,45 +135,63 @@
     padding: 0.625rem 1.25rem;
     border-radius: var(--radius);
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--foreground);
-    background-color: transparent;
+    background-color: var(--card);
     border: 1px solid var(--border);
+    font-family: var(--font-body);
     transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
   }
 
   .btn-secondary:hover {
-    background-color: var(--muted);
-    border-color: var(--ring);
+    background-color: var(--secondary);
+    border-color: #cbd5e1;
   }
 
   .btn-secondary:active {
     transform: scale(0.98);
   }
 
-  /* Input fields */
-  .crimson-input {
+  /* Input fields matching Project Era style */
+  .crimson-input, .era-input {
     background-color: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 0.55rem 0.85rem;
+    padding: 0.6rem 0.85rem;
     font-size: 14px;
     color: var(--foreground);
+    font-family: var(--font-body);
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
-  .crimson-input:focus {
+  .crimson-input:focus, .era-input:focus {
     outline: none;
     border-color: var(--ring);
-    box-shadow: 0 0 0 1px var(--ring);
+    box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.12);
   }
 
-  /* Small Labels */
-  .crimson-label {
+  /* Small Labels and Badges */
+  .crimson-label, .era-label {
     font-size: 12px;
     color: var(--muted-foreground);
-    letter-spacing: 0.04em;
-    font-weight: 700;
+    letter-spacing: 0.02em;
+    font-weight: 600;
+    font-family: var(--font-body);
+  }
+
+  /* Subtle Warm Accent Tag */
+  .badge-accent {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    background-color: var(--accent-light);
+    border: 1px solid #fed7aa;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--font-body);
   }
 
   .pb-safe {
@@ -159,7 +199,7 @@
   }
 }
 
-/* Print styles */
+/* Print styles for certificates */
 @media print {
   .no-print {
     display: none !important;
@@ -169,8 +209,8 @@
     color: #000000 !important;
   }
   #certificate-container {
-    border: 3px double #3d3929 !important;
+    border: 3px double #1a2744 !important;
     box-shadow: none !important;
-    padding: 2rem !important;
+    padding: 2.5rem !important;
   }
 }
