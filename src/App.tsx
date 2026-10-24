@@ -7,7 +7,6 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   User, 
-  Calendar, 
   BookOpen, 
   ChevronRight, 
   ChevronLeft, 
@@ -29,8 +28,6 @@ import {
   Instagram,
   Linkedin,
   ShieldAlert,
-  Maximize,
-  Minimize,
   AlertTriangle,
   Eye,
   EyeOff,
@@ -42,11 +39,7 @@ import {
   Cpu,
   ShieldCheck,
   Zap,
-  Flame,
-  AwardIcon,
   Github,
-  QrCode,
-  Sparkles,
   ExternalLink,
   ChevronDown,
   Home
@@ -54,7 +47,7 @@ import {
 import confetti from 'canvas-confetti';
 import { questions, Question } from './data/questions';
 
-// Bypasses browser autoplay restrictions using programmatic high-fidelity sine oscillators
+// High-fidelity sine oscillators for responsive audio feedback
 class SyntheticSoundService {
   private ctx: AudioContext | null = null;
   public enabled: boolean = true;
@@ -76,14 +69,14 @@ class SyntheticSoundService {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(900, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(200, this.ctx.currentTime + 0.08);
-      gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
+      osc.frequency.setValueAtTime(540, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(220, this.ctx.currentTime + 0.05);
+      gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
       osc.connect(gain);
       gain.connect(this.ctx.destination);
       osc.start();
-      osc.stop(this.ctx.currentTime + 0.08);
+      osc.stop(this.ctx.currentTime + 0.05);
     } catch {}
   }
 
@@ -95,7 +88,7 @@ class SyntheticSoundService {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(1500, this.ctx.currentTime);
+      osc.frequency.setValueAtTime(1000, this.ctx.currentTime);
       gain.gain.setValueAtTime(0.02, this.ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.02);
       osc.connect(gain);
@@ -111,19 +104,19 @@ class SyntheticSoundService {
       this.initCtx();
       if (!this.ctx) return;
       const t = this.ctx.currentTime;
-      [0, 0.15].forEach(delay => {
+      [0, 0.12].forEach(delay => {
         if (!this.ctx) return;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(380, t + delay);
-        osc.frequency.linearRampToValueAtTime(150, t + delay + 0.12);
-        gain.gain.setValueAtTime(0.06, t + delay);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + delay + 0.12);
+        osc.frequency.setValueAtTime(300, t + delay);
+        osc.frequency.linearRampToValueAtTime(150, t + delay + 0.1);
+        gain.gain.setValueAtTime(0.05, t + delay);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + delay + 0.1);
         osc.connect(gain);
         gain.connect(this.ctx.destination);
         osc.start(t + delay);
-        osc.stop(t + delay + 0.12);
+        osc.stop(t + delay + 0.1);
       });
     } catch {}
   }
@@ -134,19 +127,19 @@ class SyntheticSoundService {
       this.initCtx();
       if (!this.ctx) return;
       const now = this.ctx.currentTime;
-      const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6 major chord arpeggio
+      const notes = [523.25, 659.25, 783.99, 1046.50];
       notes.forEach((freq, idx) => {
         if (!this.ctx) return;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, now + idx * 0.08);
-        gain.gain.setValueAtTime(0.04, now + idx * 0.08);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.25);
+        osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+        gain.gain.setValueAtTime(0.04, now + idx * 0.07);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.22);
         osc.connect(gain);
         gain.connect(this.ctx.destination);
-        osc.start(now + idx * 0.08);
-        osc.stop(now + idx * 0.08 + 0.28);
+        osc.start(now + idx * 0.07);
+        osc.stop(now + idx * 0.07 + 0.25);
       });
     } catch {}
   }
@@ -157,25 +150,17 @@ class SyntheticSoundService {
       this.initCtx();
       if (!this.ctx) return;
       const now = this.ctx.currentTime;
-      const osc1 = this.ctx.createOscillator();
-      const osc2 = this.ctx.createOscillator();
+      const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-      osc1.type = 'sine';
-      osc2.type = 'triangle';
-      osc1.frequency.setValueAtTime(220, now);
-      osc1.frequency.exponentialRampToValueAtTime(880, now + 1.0);
-      osc2.frequency.setValueAtTime(221.5, now);
-      osc2.frequency.exponentialRampToValueAtTime(882.5, now + 1.0);
-      gain.gain.setValueAtTime(0.015, now);
-      gain.gain.linearRampToValueAtTime(0.06, now + 0.7);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
-      osc1.connect(gain);
-      osc2.connect(gain);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(260, now);
+      osc.frequency.exponentialRampToValueAtTime(520, now + 0.35);
+      gain.gain.setValueAtTime(0.03, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+      osc.connect(gain);
       gain.connect(this.ctx.destination);
-      osc1.start(now);
-      osc2.start(now);
-      osc1.stop(now + 1.0);
-      osc2.stop(now + 1.0);
+      osc.start(now);
+      osc.stop(now + 0.4);
     } catch {}
   }
 
@@ -185,31 +170,17 @@ class SyntheticSoundService {
       this.initCtx();
       if (!this.ctx) return;
       const now = this.ctx.currentTime;
-      // Dub-dub heartbeat sound: first beat (low)
       const osc1 = this.ctx.createOscillator();
       const gain1 = this.ctx.createGain();
       osc1.type = 'sine';
       osc1.frequency.setValueAtTime(55, now);
-      osc1.frequency.exponentialRampToValueAtTime(10, now + 0.15);
-      gain1.gain.setValueAtTime(0.25, now);
-      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      osc1.frequency.exponentialRampToValueAtTime(10, now + 0.12);
+      gain1.gain.setValueAtTime(0.16, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
       osc1.connect(gain1);
       gain1.connect(this.ctx.destination);
       osc1.start(now);
-      osc1.stop(now + 0.15);
-
-      // Second beat (slightly higher pitch) after 0.22 seconds
-      const osc2 = this.ctx.createOscillator();
-      const gain2 = this.ctx.createGain();
-      osc2.type = 'sine';
-      osc2.frequency.setValueAtTime(58, now + 0.22);
-      osc2.frequency.exponentialRampToValueAtTime(10, now + 0.22 + 0.18);
-      gain2.gain.setValueAtTime(0.22, now + 0.22);
-      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.22 + 0.18);
-      osc2.connect(gain2);
-      gain2.connect(this.ctx.destination);
-      osc2.start(now + 0.22);
-      osc2.stop(now + 0.22 + 0.18);
+      osc1.stop(now + 0.12);
     } catch {}
   }
 }
@@ -233,21 +204,18 @@ interface Toast {
 }
 
 const MOTIVATIONAL_HUD_PROMPTS = [
-  "Focus Mode Activated ⚡",
-  "Great Progress! Stay Calm 🚀",
-  "Keep Going! Success is Near 🔥",
-  "Secure Link Fully Encrypted 🔒",
-  "You're Doing Incredible!",
-  "Analytical Process Stable 🧠",
-  "Maintain Full Concentration 🎯"
+  "Focus Mode Active",
+  "Great Progress",
+  "Keep Going",
+  "Secure Link Encrypted",
+  "You're Doing Well",
+  "Process Stable",
+  "Maintain Concentration"
 ];
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('home');
   const [examStep, setExamStep] = useState<ExamStep>('gate');
-  const [isLoaderBooting, setIsLoaderBooting] = useState(true);
-  const [bootProgress, setBootProgress] = useState(0);
-  const [bootStatusText, setBootStatusText] = useState('VERIFYING COGNITIVE MODULES...');
   
   const [userData, setUserData] = useState<UserData>({
     name: '',
@@ -257,7 +225,6 @@ export default function App() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
-
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [questionTimeLeft, setQuestionTimeLeft] = useState(60);
@@ -273,7 +240,6 @@ export default function App() {
   const [showViolationModal, setShowViolationModal] = useState(false);
   const [isReviewMode, setIsReviewMode] = useState(false);
   const [warnings, setWarnings] = useState(0);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   const [isDrumrollActive, setIsDrumrollActive] = useState(false);
   
@@ -282,89 +248,11 @@ export default function App() {
   const [randomizedQuestionsList, setRandomizedQuestionsList] = useState<Question[]>([]);
   const [antiCheatFlashActive, setAntiCheatFlashActive] = useState(false);
   
-  // Scanning sequence variables
   const [scanningProgress, setScanningProgress] = useState(0);
-  const [scanningStatus, setScanningStatus] = useState('DECRYPTING TRANSACTIONS...');
-  
-  // UI coordinates for holographic background glow
-  const [mouseCoord, setMouseCoord] = useState({ x: 0, y: 0 });
-  const [scrolledNavVisible, setScrolledNavVisible] = useState(true);
-  const lastScrollY = useRef(0);
-
-  const [typingText, setTypingText] = useState("");
-  const [typingPhraseIndex, setTypingPhraseIndex] = useState(0);
-
-  const phrases = useMemo(() => [
-    "Secure Online Assessments 🔒",
-    "Advanced Real-Time Analytics 🧠",
-    "Shielded Anti-Cheat Monitoring 🛡️",
-    "Immersive Educational Journeys 🚀"
-  ], []);
-
-  useEffect(() => {
-    let activePhrase = phrases[typingPhraseIndex];
-    let charIndex = 0;
-    let isDeleting = false;
-    let timer: any;
-
-    const tick = () => {
-      if (!isDeleting) {
-        setTypingText(activePhrase.substring(0, charIndex + 1));
-        charIndex++;
-        if (charIndex === activePhrase.length) {
-          isDeleting = true;
-          timer = setTimeout(tick, 2000);
-        } else {
-          timer = setTimeout(tick, 60);
-        }
-      } else {
-        setTypingText(activePhrase.substring(0, charIndex - 1));
-        charIndex--;
-        if (charIndex === 0) {
-          isDeleting = false;
-          setTypingPhraseIndex(prev => (prev + 1) % phrases.length);
-          timer = setTimeout(tick, 500);
-        } else {
-          timer = setTimeout(tick, 40);
-        }
-      }
-    };
-
-    timer = setTimeout(tick, 500);
-    return () => clearTimeout(timer);
-  }, [typingPhraseIndex, phrases]);
+  const [scanningStatus, setScanningStatus] = useState('Verifying responses...');
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const totalTimerRef = useRef<NodeJS.Timeout | null>(null);
-  
-  // Motivational Prompts Tracker
-  const hudPrompt = useMemo(() => {
-    return MOTIVATIONAL_HUD_PROMPTS[currentQuestionIndex % MOTIVATIONAL_HUD_PROMPTS.length];
-  }, [currentQuestionIndex]);
-
-  // Handle document level mouse track for glowing highlight
-  useEffect(() => {
-    const handleCoord = (e: MouseEvent) => {
-      setMouseCoord({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleCoord);
-    return () => window.removeEventListener('mousemove', handleCoord);
-  }, []);
-
-  // Hide or Show bottom floating navigation on scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentY = window.scrollY;
-      if (currentY > lastScrollY.current && currentY > 80) {
-        setScrolledNavVisible(false);
-      } else {
-        setScrolledNavVisible(true);
-      }
-      lastScrollY.current = currentY;
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Dynamic Questions selection conforming to current selected track
   const currentExamQuestions = useMemo(() => {
@@ -374,13 +262,10 @@ export default function App() {
   // Interactive Question Shuffle based on Difficulty and sequence
   const generateRandomShuffledSyllabus = (trackName: keyof typeof questions) => {
     const allQuestions = [...questions[trackName]];
-    
-    // Classify by difficulty status
     const easyQs = allQuestions.filter(q => q.difficulty === 'easy');
     const mediumQs = allQuestions.filter(q => q.difficulty === 'medium');
     const hardQs = allQuestions.filter(q => q.difficulty === 'hard');
     
-    // Standard random shuffler
     const shuffleArray = <T,>(arr: T[]): T[] => {
       const shuffled = [...arr];
       for (let i = shuffled.length - 1; i > 0; i--) {
@@ -390,15 +275,8 @@ export default function App() {
       return shuffled;
     };
     
-    // Shuffle each block individually
-    const shuffledEasy = shuffleArray(easyQs);
-    const shuffledMedium = shuffleArray(mediumQs);
-    const shuffledHard = shuffleArray(hardQs);
+    const combinedList = [...shuffleArray(easyQs), ...shuffleArray(mediumQs), ...shuffleArray(hardQs)];
     
-    // Assemble smooth progression sequence: Easy (7) -> Medium (7) -> Hard (6)
-    const combinedList = [...shuffledEasy, ...shuffledMedium, ...shuffledHard];
-    
-    // Shuffle options inside each question
     const finishedList = combinedList.map(item => {
       const optionsShuffled = [...item.options];
       for (let x = optionsShuffled.length - 1; x > 0; x--) {
@@ -413,20 +291,9 @@ export default function App() {
     setRandomizedQuestionsList(finishedList);
   };
 
-  // Sound toggle sync with Synthetic Service wrapper
   useEffect(() => {
     synthSvc.enabled = soundToggle;
   }, [soundToggle]);
-
-  // Loading portal cinematic animation bootseq (exactly 4.5 seconds)
-  useEffect(() => {
-    if (isLoaderBooting) {
-      const timer = setTimeout(() => {
-        setIsLoaderBooting(false);
-      }, 4500);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoaderBooting]);
 
   // Session Intercept warnings
   useEffect(() => {
@@ -438,7 +305,7 @@ export default function App() {
         if (nextWarn >= 3) {
           handleForceSubmit();
           setShowViolationModal(false);
-          triggerInstantToast('Exam auto-submitted by Smart Monitor due to excessive deviations', 'warning');
+          triggerInstantToast('Exam auto-submitted due to window deviations', 'warning');
         } else {
           setShowViolationModal(true);
         }
@@ -448,12 +315,12 @@ export default function App() {
     return () => document.removeEventListener('visibilitychange', blockTabSwitches);
   }, [activeTab, examStep, warnings]);
 
-  // Mouse screen bounds check proctoring chimes
+  // Mouse bounds check
   useEffect(() => {
     const handleBoundsGuard = () => {
       if (activeTab === 'exam' && examStep === 'quiz') {
         synthSvc.playAlert();
-        triggerInstantToast("Security Alert: Refocus gaze inside the portal region", "warning");
+        triggerInstantToast("Security Alert: Please keep focus inside the portal window", "warning");
       }
     };
     window.addEventListener('mouseleave', handleBoundsGuard);
@@ -472,14 +339,14 @@ export default function App() {
         synthSvc.playAlert();
         setAntiCheatFlashActive(true);
         setTimeout(() => setAntiCheatFlashActive(false), 300);
-        triggerInstantToast("Holographic Firewall: Shortcut patterns restricted!", "warning");
+        triggerInstantToast("Shortcut restricted by exam monitor", "warning");
       }
     };
     window.addEventListener('keydown', blockDevInput);
     return () => window.removeEventListener('keydown', blockDevInput);
   }, []);
 
-  // Block print selection/right-clicks
+  // Block context menu and copy
   useEffect(() => {
     const cancelEv = (e: Event) => e.preventDefault();
     document.addEventListener('contextmenu', cancelEv);
@@ -505,7 +372,7 @@ export default function App() {
   // Manage Toast systems
   const triggerInstantToast = (message: string, type: 'success' | 'info' | 'warning' = 'info') => {
     const id = Date.now();
-    setToasts(prev => [...prev.slice(-3), { id, message, type }]);
+    setToasts(prev => [...prev.slice(-2), { id, message, type }]);
   };
 
   useEffect(() => {
@@ -518,34 +385,37 @@ export default function App() {
     }
   }, [toasts]);
 
-  // Check storage session restore
+  // Session storage restore
   useEffect(() => {
     const cachedObject = localStorage.getItem('nst_assessment_key_v2');
     if (cachedObject) {
-      const payload = JSON.parse(cachedObject);
-      if (payload.activeTab === 'exam' && payload.examStep === 'quiz') {
-        setIsResumingExam(true);
-      }
+      try {
+        const payload = JSON.parse(cachedObject);
+        if (payload.activeTab === 'exam' && payload.examStep === 'quiz') {
+          setIsResumingExam(true);
+        }
+      } catch {}
     }
   }, []);
 
   const initRestoredSession = () => {
     const cachedObject = localStorage.getItem('nst_assessment_key_v2');
     if (cachedObject) {
-      const { userData: restoredUser, answers: restoredAnswers, currentQuestionIndex: restoredIndex, randomizedQuestionsList: restoredQ } = JSON.parse(cachedObject);
-      setUserData(restoredUser);
-      setAnswers(restoredAnswers);
-      setCurrentQuestionIndex(restoredIndex);
-      setRandomizedQuestionsList(restoredQ);
-      setActiveTab('exam');
-      setExamStep('quiz');
-      setIsResumingExam(false);
-      synthSvc.playSuccess();
-      triggerInstantToast("Secure session package re-established successfully!", "success");
+      try {
+        const { userData: restoredUser, answers: restoredAnswers, currentQuestionIndex: restoredIndex, randomizedQuestionsList: restoredQ } = JSON.parse(cachedObject);
+        setUserData(restoredUser);
+        setAnswers(restoredAnswers);
+        setCurrentQuestionIndex(restoredIndex);
+        setRandomizedQuestionsList(restoredQ);
+        setActiveTab('exam');
+        setExamStep('quiz');
+        setIsResumingExam(false);
+        synthSvc.playSuccess();
+        triggerInstantToast("Session restored successfully", "success");
+      } catch {}
     }
   };
 
-  // Sync state with dynamic session caches
   useEffect(() => {
     if (activeTab === 'exam' && examStep === 'quiz') {
       localStorage.setItem('nst_assessment_key_v2', JSON.stringify({
@@ -561,7 +431,7 @@ export default function App() {
     }
   }, [activeTab, examStep, answers, currentQuestionIndex, userData, randomizedQuestionsList]);
 
-  // Per specific question time counter
+  // Question timer
   useEffect(() => {
     if (activeTab === 'exam' && examStep === 'quiz' && questionTimeLeft > 0) {
       timerRef.current = setInterval(() => {
@@ -574,7 +444,7 @@ export default function App() {
       }, 1000);
     } else if (questionTimeLeft === 0 && activeTab === 'exam' && examStep === 'quiz') {
       synthSvc.playAlert();
-      triggerInstantToast("Time expired on current question! Swapping...", "warning");
+      triggerInstantToast("Time expired on current question. Advancing...", "warning");
       triggerProceedNext();
     }
     return () => {
@@ -586,16 +456,14 @@ export default function App() {
   const examTotalTimeLeft = Math.max(0, EXAM_TOTAL_LIMIT_SEC - totalTimeTaken);
   const isTimerPressureActive = activeTab === 'exam' && examStep === 'quiz' && examTotalTimeLeft <= 300;
 
-  // Track overall session countdown timeout
   useEffect(() => {
     if (activeTab === 'exam' && examStep === 'quiz' && examTotalTimeLeft <= 0) {
       synthSvc.playAlert();
-      triggerInstantToast("Assessment time limit expired! Automatically filing responses...", "warning");
+      triggerInstantToast("Exam time expired. Submitting responses...", "warning");
       commenceScanningComputation();
     }
   }, [examTotalTimeLeft, activeTab, examStep]);
 
-  // Overall time track accumulator
   useEffect(() => {
     if (activeTab === 'exam' && examStep === 'quiz') {
       totalTimerRef.current = setInterval(() => {
@@ -603,7 +471,6 @@ export default function App() {
           const nextVal = prev + 1;
           const timeLeft = EXAM_TOTAL_LIMIT_SEC - nextVal;
           if (timeLeft <= 300 && timeLeft > 0) {
-            // Heartbeat audio synthesized on each tick
             synthSvc.playHeartbeat();
           }
           return nextVal;
@@ -617,7 +484,6 @@ export default function App() {
     };
   }, [activeTab, examStep]);
 
-  // Passcode trigger checks
   const processSecureExamEntry = (e: React.FormEvent) => {
     e.preventDefault();
     const correctCerts: Record<string, string> = {
@@ -628,7 +494,7 @@ export default function App() {
 
     if (userData.password !== correctCerts[userData.course]) {
       synthSvc.playAlert();
-      triggerInstantToast("Verification failed: passcode key is invalid!", "warning");
+      triggerInstantToast("Verification failed: passcode is invalid", "warning");
       return;
     }
 
@@ -636,16 +502,14 @@ export default function App() {
       synthSvc.playSwell();
       generateRandomShuffledSyllabus(userData.course);
       
-      // Enter the quiz setup
       setQuestionTimeLeft(60);
       setTotalTimeTaken(0);
       setCurrentQuestionIndex(0);
       setAnswers({});
       setWarnings(0);
       
-      // Open the gorgeous cinematic welcome popup
       setShowWelcomePopup(true);
-      triggerInstantToast(`Secure credentials verified for ${userData.name}!`, "success");
+      triggerInstantToast(`Credentials verified for ${userData.name}`, "success");
     }
   };
 
@@ -677,72 +541,38 @@ export default function App() {
     try {
       const accuracyText = (score / currentExamQuestions.length * 100).toFixed(1);
       const svgContent = `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920" style="background: #03050a; font-family: 'Times New Roman', serif;">
-          <defs>
-            <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#00d2ff" stop-opacity="0.3"/>
-              <stop offset="100%" stop-color="#a855f7" stop-opacity="0.3"/>
-            </linearGradient>
-            <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#00f0ff"/>
-              <stop offset="100%" stop-color="#7000ff"/>
-            </linearGradient>
-          </defs>
-          
-          <!-- Outer border neon -->
-          <rect x="30" y="30" width="1020" height="1860" rx="40" fill="none" stroke="url(#headerGrad)" stroke-width="6" opacity="0.8"/>
-          
-          <!-- Decorative circle background lights -->
-          <circle cx="540" cy="960" r="350" fill="url(#glow)" filter="blur(80px)"/>
-          
-          <!-- Header text -->
-          <text x="540" y="240" font-size="24" font-family="'Times New Roman', serif" fill="#00d2ff" font-weight="bold" letter-spacing="8" text-anchor="middle" opacity="0.9">NS TECHNOLOGY ASSESSMENT</text>
-          
-          <!-- Inner elegant card boundary -->
-          <rect x="100" y="340" width="880" height="1240" rx="30" fill="#0c1020" fill-opacity="0.85" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
-          
-          <!-- Title text -->
-          <text x="540" y="520" font-size="52" fill="#ffffff" font-weight="900" letter-spacing="4" text-anchor="middle" font-family="'Times New Roman', serif">OFFICIAL COGNITIVE TRANSCRIPT</text>
-          
-          <line x1="200" y1="580" x2="880" y2="580" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
-          
-          <!-- Candidate Nominee -->
-          <text x="540" y="680" font-size="28" fill="#888888" font-family="'Times New Roman', serif" text-anchor="middle">CANDIDATE NOMINEE</text>
-          <text x="540" y="750" font-size="56" fill="#ffffff" font-weight="bold" text-family="'Times New Roman', serif" text-anchor="middle">${userData.name || 'ANONYMOUS SPECIALIST'}</text>
-          
-          <!-- Course syllabus -->
-          <text x="540" y="860" font-size="26" fill="#888888" font-family="'Times New Roman', serif" text-anchor="middle">SYLLABUS TRACK</text>
-          <text x="540" y="920" font-size="44" fill="#00d2ff" font-weight="bold" text-family="'Times New Roman', serif" text-anchor="middle">${userData.course}</text>
-          
-          <!-- Huge Score Container -->
-          <rect x="240" y="1030" width="600" height="240" rx="20" fill="#03050a" stroke="url(#headerGrad)" stroke-width="3"/>
-          <text x="540" y="1140" font-size="80" fill="#ffffff" font-weight="900" font-family="'Times New Roman', serif" text-anchor="middle">${accuracyText}%</text>
-          <text x="540" y="1210" font-size="22" font-family="'Times New Roman', serif" fill="#888888" letter-spacing="4" text-anchor="middle">VERIFIED SCORE ACCURACY</text>
-          
-          <!-- ID Code -->
-          <text x="540" y="1380" font-size="24" font-family="'Times New Roman', serif" fill="#888e9b" text-anchor="middle">CERTIFICATE ID: ${certificateId}</text>
-          <text x="540" y="1430" font-size="20" font-family="'Times New Roman', serif" fill="#00e575" text-anchor="middle">STATUS: SECURE CREDENTIALS ENCODED</text>
-          
-          <!-- Bottom Brand info -->
-          <text x="540" y="1690" font-size="22" font-family="'Times New Roman', serif" fill="#888888" letter-spacing="2" text-anchor="middle">@2026 NS TECHNOLOGY • SYSTEM PRIVACY ASSURED</text>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920" style="background: #faf9f5; font-family: 'Times New Roman', serif;">
+          <rect x="40" y="40" width="1000" height="1840" rx="16" fill="#faf9f5" stroke="#dad9d4" stroke-width="3"/>
+          <text x="540" y="240" font-size="28" fill="#83827d" font-weight="700" letter-spacing="2" text-anchor="middle">NS TECHNOLOGY ASSESSMENT</text>
+          <text x="540" y="440" font-size="46" fill="#3d3929" font-weight="700" text-anchor="middle">Official Exam Transcript</text>
+          <line x1="200" y1="500" x2="880" y2="500" stroke="#dad9d4" stroke-width="2"/>
+          <text x="540" y="620" font-size="22" fill="#83827d" text-anchor="middle">CANDIDATE</text>
+          <text x="540" y="680" font-size="42" fill="#3d3929" font-weight="700" text-anchor="middle">${userData.name || 'Student'}</text>
+          <text x="540" y="800" font-size="22" fill="#83827d" text-anchor="middle">COURSE</text>
+          <text x="540" y="860" font-size="36" fill="#c96442" font-weight="700" text-anchor="middle">${userData.course}</text>
+          <rect x="240" y="980" width="600" height="240" rx="16" fill="#ede9de" stroke="#c96442" stroke-width="2"/>
+          <text x="540" y="1110" font-size="72" fill="#3d3929" font-weight="700" text-anchor="middle">${accuracyText}%</text>
+          <text x="540" y="1170" font-size="20" fill="#83827d" text-anchor="middle">Verified Score Accuracy</text>
+          <text x="540" y="1380" font-size="22" fill="#83827d" text-anchor="middle">Certificate ID: ${certificateId}</text>
+          <text x="540" y="1430" font-size="20" fill="#c96442" text-anchor="middle">Status: Verified & Completed</text>
+          <text x="540" y="1720" font-size="20" fill="#83827d" text-anchor="middle">© 2026 NS Technology • All Rights Reserved</text>
         </svg>
       `;
       const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `NS_TECH_RESULT_${(userData.name || 'GRAD').toUpperCase().replace(/\s+/g, '_')}.svg`;
+      link.download = `NS_TECH_RESULT_${(userData.name || 'STUDENT').toUpperCase().replace(/\s+/g, '_')}.svg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      triggerInstantToast("Result card snapshot exported successfully! 🚀", "success");
+      triggerInstantToast("Result transcript exported successfully", "success");
     } catch(err) {
       triggerInstantToast("Snapshot generation failed", "warning");
     }
   };
 
-  // Interactive Scan effect and grade evaluator
   const commenceScanningComputation = () => {
     synthSvc.playSwell();
     setExamStep('scanning');
@@ -750,12 +580,11 @@ export default function App() {
     
     let count = 0;
     const scanInterval = setInterval(() => {
-      count += Math.floor(Math.random() * 12) + 4;
+      count += Math.floor(Math.random() * 14) + 6;
       if (count >= 100) {
         count = 100;
         clearInterval(scanInterval);
         
-        // Tabulate secure outputs
         let finalTalliedScore = 0;
         currentExamQuestions.forEach((item, index) => {
           if (answers[index] === item.answer) {
@@ -766,50 +595,41 @@ export default function App() {
         setScore(finalTalliedScore);
         setExamStep('result');
         setIsDrumrollActive(true);
-        triggerInstantToast("Holographic core evaluations submitted...", "info");
         
         let tickTimes = 0;
         const drumInterval = setInterval(() => {
           synthSvc.playTick();
           tickTimes++;
-          if (tickTimes >= 12) {
+          if (tickTimes >= 10) {
             clearInterval(drumInterval);
           }
         }, 120);
 
         setTimeout(() => {
           setIsDrumrollActive(false);
-          triggerInstantToast("Grade calculations assembled!", "success");
+          triggerInstantToast("Results evaluated successfully", "success");
           
-          const accuracyPercent = (finalTalliedScore / currentExamQuestions.length) * 100;
-          let confColors = ['#00d2ff', '#3b82f6', '#ffffff']; // Low score (blue)
-          if (accuracyPercent >= 90) {
-            confColors = ['#ffd700', '#f59e0b', '#d97706']; // High score (gold)
-          } else if (accuracyPercent >= 50) {
-            confColors = ['#a855f7', '#d946ef', '#c084fc']; // Medium score (purple)
-          }
-
           confetti({
-            particleCount: 160,
-            spread: 80,
+            particleCount: 100,
+            spread: 60,
             origin: { y: 0.6 },
-            colors: confColors
+            colors: ['#c96442', '#e9e6dc', '#83827d']
           });
 
           synthSvc.playSuccess();
-        }, 1500);
+        }, 1200);
       }
       setScanningProgress(count);
-      if (count < 30) {
-        setScanningStatus('TRANSMITTING ANSWERS TO AI VALIDATOR CORE...');
-      } else if (count < 65) {
-        setScanningStatus('AUDITING SESSION INTEGRITY LOGS...');
-      } else if (count < 90) {
-        setScanningStatus('COMPUTING GRADE ACCURACY INDEX...');
+      if (count < 35) {
+        setScanningStatus('Transmitting responses to validation system...');
+      } else if (count < 70) {
+        setScanningStatus('Auditing session integrity logs...');
+      } else if (count < 95) {
+        setScanningStatus('Computing score and accuracy...');
       } else {
-        setScanningStatus('DECRYPTATION COMPLETE • METRICS SECURED!');
+        setScanningStatus('Evaluation complete');
       }
-    }, 150);
+    }, 120);
   };
 
   const handleForceSubmit = () => {
@@ -824,7 +644,6 @@ export default function App() {
     setShowSubmitModal(false);
   };
 
-  // Score accumulation animation on result screen
   useEffect(() => {
     if (examStep === 'result') {
       let runTracker = 0;
@@ -833,7 +652,7 @@ export default function App() {
         setAnimatedScore(targetScore);
         return;
       }
-      const animRate = targetScore / 40;
+      const animRate = Math.max(1, targetScore / 25);
       const clock = setInterval(() => {
         runTracker += animRate;
         if (runTracker >= targetScore) {
@@ -842,24 +661,12 @@ export default function App() {
         } else {
           setAnimatedScore(Math.floor(runTracker));
         }
-      }, 20);
+      }, 25);
       return () => clearInterval(clock);
     } else {
       setAnimatedScore(0);
     }
   }, [examStep, score]);
-
-  const toggleSecureFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {
-        triggerInstantToast("Note: External container frames may restrict full browser screen override", "info");
-      });
-      setIsFullscreen(true);
-    } else {
-      document.exitFullscreen().catch(() => {});
-      setIsFullscreen(false);
-    }
-  };
 
   const calculateRemainingSecondsTime = (totalSeconds: number) => {
     const minutes = Math.floor(totalSeconds / 60);
@@ -875,11 +682,11 @@ export default function App() {
     if (progressPercent <= 20) {
       return "Focus Mode Activated";
     } else if (progressPercent <= 40) {
-      return "Great Progress 🚀";
+      return "Great Progress";
     } else if (progressPercent <= 60) {
-      return "Keep Going 🔥";
+      return "Keep Going";
     } else if (progressPercent <= 80) {
-      return "Excellent Accuracy ⚡";
+      return "Excellent Accuracy";
     } else {
       return "Success is Near";
     }
@@ -888,36 +695,34 @@ export default function App() {
   const percentageGradeRatio = (score / currentExamQuestions.length) * 100;
   const isSufficientlyPassed = percentageGradeRatio >= 40;
 
-  // Grade performance descriptors depending on final score accuracy ratios
   const performance = useMemo(() => {
     const pct = percentageGradeRatio;
     if (pct >= 90) {
       return {
         rank: 'Elite Specialist',
         msg: 'Distinction Authorized',
-        icon: '🏆'
+        color: 'text-[var(--primary)]'
       };
     } else if (pct >= 60) {
       return {
         rank: 'Qualified Operator',
         msg: 'Pass Standard Attained',
-        icon: '⚡'
+        color: 'text-[var(--primary)]'
       };
     } else {
       return {
         rank: 'Aspirant',
-        msg: 'Calibration Failed',
-        icon: '⚠️'
+        msg: 'Calibration Required',
+        color: 'text-[var(--error)]'
       };
     }
   }, [percentageGradeRatio]);
 
-  // Real intelligence review generator based on exact score, syllabus and proctor metrics
   const customAIProcText = useMemo(() => {
     const accuracy = percentageGradeRatio;
     let comment = '';
     if (accuracy >= 90) {
-      comment = `AI proctor validation scores your performance at elite levels. Your response speed coefficients suggest excellent mastery over '${userData.course}' fundamentals. Minimal security variances detected. Certified high-tier credentials authorized for generation.`;
+      comment = `Proctor validation scores your performance at elite levels. Your response speed coefficients suggest excellent mastery over '${userData.course}' fundamentals. Minimal security variances detected. Certified high-tier credentials authorized for generation.`;
     } else if (accuracy >= 65) {
       comment = `Adequate cognitive response profile established. The system noted strong correct chains in several consecutive milestones. Some knowledge limits indicated in challenging structures. Security compliance parameters remain stable.`;
     } else if (accuracy >= 40) {
@@ -928,51 +733,9 @@ export default function App() {
     return comment;
   }, [percentageGradeRatio, userData.course]);
 
-  // SMART THEME DYNAMIC ATTRIBUTES
-  const themeDetails = useMemo(() => {
-    if (examStep !== 'result' && examStep !== 'certificate') {
-      return {
-        accentGlow: 'rgba(0, 210, 255, 0.45)',
-        accentBg: 'bg-gradient-to-r from-cyan-500 to-blue-600',
-        borderColor: 'border-cyan-500/30',
-        glowText: 'text-cyan-400',
-        metaHex: '#00d2ff',
-        auraGlow: 'bg-glow-web'
-      };
-    }
-    if (percentageGradeRatio >= 90) {
-      return {
-        accentGlow: 'rgba(234, 179, 8, 0.55)',
-        accentBg: 'bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-600',
-        borderColor: 'border-yellow-500/40 shadow-[0_0_20px_rgba(234,179,8,0.2)]',
-        glowText: 'text-yellow-400',
-        metaHex: '#eab308',
-        auraGlow: 'bg-glow-tally'
-      };
-    } else if (percentageGradeRatio >= 50) {
-      return {
-        accentGlow: 'rgba(168, 85, 247, 0.55)',
-        accentBg: 'bg-gradient-to-r from-purple-500 to-fuchsia-600',
-        borderColor: 'border-purple-500/40 shadow-[0_0_20px_rgba(168,85,247,0.2)]',
-        glowText: 'text-purple-400',
-        metaHex: '#a855f7',
-        auraGlow: 'bg-glow-computer'
-      };
-    } else {
-      return {
-        accentGlow: 'rgba(59, 130, 246, 0.45)',
-        accentBg: 'bg-gradient-to-r from-blue-600 to-indigo-700',
-        borderColor: 'border-blue-500/30',
-        glowText: 'text-blue-400',
-        metaHex: '#3b82f6',
-        auraGlow: 'bg-glow-web'
-      };
-    }
-  }, [examStep, percentageGradeRatio]);
-
   // Interactive FAQ query management
   const [faqCriteria, setFaqCriteria] = useState('');
-  const [openedFaqIndices, setOpenedFaqIndices] = useState<Record<number, boolean>>({});
+  const [openedFaqIndices, setOpenedFaqIndices] = useState<Record<number, boolean>>({ 0: true });
 
   const faqItemsList = [
     {
@@ -1017,202 +780,69 @@ export default function App() {
     }));
   };
 
+  const hudPrompt = useMemo(() => {
+    return MOTIVATIONAL_HUD_PROMPTS[currentQuestionIndex % MOTIVATIONAL_HUD_PROMPTS.length];
+  }, [currentQuestionIndex]);
+
   return (
-    <div className="min-h-screen bg-[#03060d] text-white overflow-x-hidden font-sans select-none relative pb-28 md:pb-12">
-      {/* Background Neon Spot Spotlight cursor trace */}
-      <div 
-        className="pointer-events-none fixed z-20 w-[450px] h-[450px] rounded-full opacity-30 mix-blend-screen transition-transform duration-200"
-        style={{
-          background: `radial-gradient(circle, ${themeDetails.metaHex}33 0%, transparent 70%)`,
-          left: `${mouseCoord.x - 225}px`,
-          top: `${mouseCoord.y - 225}px`,
-        }}
-      />
-
-      {/* Cyber Grid Pattern Background Overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0" />
-      
-      {/* Dynamic Aurora Atmospheric Glows */}
-      <div className={`fixed inset-0 pointer-events-none z-0 opacity-40 transition-all duration-1000 ${themeDetails.auraGlow}`} />
-
-      {/* Dynamic Timer Pressure Tension Overlay (Last 5 minutes red heartbeat) */}
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] overflow-x-hidden select-none relative pb-28 md:pb-28">
+      {/* Timer Pressure Alert Banner */}
       {isTimerPressureActive && (
-        <div className="fixed inset-0 pointer-events-none z-[90] border-[6px] md:border-[12px] border-rose-500/15 animate-pulse shadow-[inset_0_0_80px_rgba(244,63,94,0.18)] flex justify-center items-start pt-24">
-          <div className="px-4 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 font-mono text-[10px] font-bold tracking-widest uppercase flex items-center gap-2 animate-bounce shadow-lg shadow-rose-950/20">
-            <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-            CRITICAL SECURE SESSION TIMEOUT COUNTDOWN : PASSING COMPLIANCE RUN REQUIRED
-          </div>
+        <div className="fixed top-14 inset-x-0 z-30 bg-[var(--error)] text-white px-4 py-2 text-center text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
+          <AlertCircle size={15} />
+          <span>Less than 5 minutes remaining in this examination session.</span>
         </div>
       )}
 
-      {/* Anti-cheat interface screen flashing guard */}
+      {/* Anti-cheat Flash Guard */}
       {antiCheatFlashActive && (
-        <div className="fixed inset-0 z-[1000] bg-rose-600/90 pointer-events-none transition-opacity duration-300 flex items-center justify-center">
-          <div className="text-center text-white scale-125">
-            <ShieldAlert size={80} className="mx-auto mb-4 animate-bounce" />
-            <p className="text-2xl font-black uppercase tracking-wider">RESTRICTED SHORTCUT INBOUND!</p>
+        <div className="fixed inset-0 z-[1000] bg-[var(--error)]/90 text-white pointer-events-none transition-opacity duration-150 flex items-center justify-center">
+          <div className="text-center">
+            <ShieldAlert size={56} className="mx-auto mb-3" />
+            <p className="text-lg font-bold">Restricted Shortcut Inbound</p>
           </div>
         </div>
       )}
 
-      {/* Device Orientation rotation prompt panel */}
+      {/* Orientation Warning */}
       {!isPortrait && (
-        <div className="rotation-warning flex flex-col items-center justify-center text-center p-8 bg-[#040812]/95 z-[999]">
-          <Smartphone size={55} className="text-cyan-400 mb-4 animate-bounce" />
-          <h2 className="text-2xl font-extrabold tracking-tight uppercase mb-2">Refit Device Alignment</h2>
-          <p className="text-sm text-white/60">Immersive examination safety frameworks require portrait orientation on small layouts.</p>
+        <div className="fixed inset-0 bg-[var(--background)] z-[999] flex flex-col items-center justify-center text-center p-8">
+          <Smartphone size={44} className="text-[var(--primary)] mb-4" />
+          <h2 className="text-lg font-bold text-[var(--foreground)] mb-2">Refit Device Alignment</h2>
+          <p className="text-xs text-[var(--muted-foreground)] max-w-xs">Examination safety frameworks require portrait orientation on mobile screens.</p>
         </div>
       )}
 
-      {/* Cinematic Hacker Loader Boot sequence */}
-      <AnimatePresence>
-        {isLoaderBooting && (
-          <motion.div 
-            key="hacker-boot-loader"
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 1.05, filter: "blur(12px)" }}
-            transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 bg-[#030509] z-[1000] flex flex-col items-center justify-center p-6 overflow-hidden select-none"
-          >
-            {/* Immersive Rotating Aurora Background Glimmers */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              <motion.div 
-                animate={{ rotate: 360 }}
-                transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
-                className="absolute -top-1/4 -left-1/4 w-[150%] h-[150%] opacity-40 mix-blend-screen"
-                style={{
-                  background: 'radial-gradient(circle, rgba(6,182,212,0.18) 0%, rgba(168,85,247,0.14) 30%, transparent 60%)',
-                }}
-              />
-              <motion.div 
-                animate={{ rotate: -360 }}
-                transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
-                className="absolute -bottom-1/4 -right-1/4 w-[150%] h-[150%] opacity-35 mix-blend-screen"
-                style={{
-                  background: 'radial-gradient(circle, rgba(59,130,246,0.12) 0%, rgba(217,70,239,0.1) 40%, transparent 75%)',
-                }}
-              />
-            </div>
-
-            {/* Premium Soft Background Particles */}
-            <div className="absolute inset-0 pointer-events-none opacity-25">
-              {[...Array(14)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute bg-cyan-400 rounded-full blur-[1px]"
-                  style={{
-                    width: Math.random() * 3 + 2,
-                    height: Math.random() * 3 + 2,
-                    left: `${Math.random() * 100}%`,
-                    top: `${Math.random() * 100}%`,
-                    boxShadow: '0 0 8px #00d2ff',
-                  }}
-                  animate={{
-                    y: [0, -45, 0],
-                    x: [0, Math.random() * 20 - 10, 0],
-                    opacity: [0.2, 0.9, 0.2],
-                  }}
-                  transition={{
-                    duration: Math.random() * 4 + 3.5,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    delay: Math.random() * 2,
-                  }}
-                />
-              ))}
-            </div>
-
-            {/* Glowing Text Reveal Container */}
-            <div className="relative text-center w-full max-w-xl px-4 flex flex-col items-center justify-center">
-              {/* Outer container shimmer for exquisite cinematic vibes */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
-                className="space-y-4 text-center sm:space-y-6 flex flex-col items-center justify-center"
-              >
-                {/* Line 1: NS TECHNOLOGY with premium motion blur entry */}
-                <h1 className="text-[7.5vw] sm:text-5xl md:text-6xl font-black tracking-[0.22em] text-white leading-none uppercase select-none drop-shadow-[0_0_25px_rgba(255,255,255,0.35)] font-serif whitespace-nowrap overflow-visible pl-4">
-                  {"NS TECHNOLOGY".split("").map((char, index) => (
-                    <motion.span
-                      key={index}
-                      initial={{ opacity: 0, scale: 0.9, filter: "blur(14px)", y: 15 }}
-                      animate={{ opacity: 1, scale: 1, filter: "blur(0px)", y: 0 }}
-                      transition={{
-                        delay: index * 0.05,
-                        duration: 1.4,
-                        ease: [0.16, 1, 0.3, 1],
-                      }}
-                      className="inline-block"
-                      style={{ whiteSpace: char === " " ? "pre" : "normal" }}
-                    >
-                      {char}
-                    </motion.span>
-                  ))}
-                </h1>
-
-                {/* Line 2: EXAM PORTAL with luxurious delayed reveal cascade */}
-                <h2 className="text-[5.5vw] sm:text-3xl md:text-4xl font-extrabold tracking-[0.28em] text-cyan-400 leading-none uppercase select-none drop-shadow-[0_0_20px_rgba(6,182,212,0.7)] font-serif whitespace-nowrap overflow-visible pl-4">
-                  {"EXAM PORTAL".split("").map((char, index) => (
-                    <motion.span
-                      key={index}
-                      initial={{ opacity: 0, scale: 0.9, filter: "blur(14px)", y: 15 }}
-                      animate={{ opacity: 1, scale: 1, filter: "blur(0px)", y: 0 }}
-                      transition={{
-                        delay: 0.7 + index * 0.05,
-                        duration: 1.4,
-                        ease: [0.16, 1, 0.3, 1],
-                      }}
-                      className="inline-block"
-                      style={{ whiteSpace: char === " " ? "pre" : "normal" }}
-                    >
-                      {char}
-                    </motion.span>
-                  ))}
-                </h2>
-              </motion.div>
-
-              {/* Glowing elegant horizontal divider line */}
-              <motion.div
-                initial={{ width: "0%", opacity: 0 }}
-                animate={{ width: "65%", opacity: [0, 0.75, 0] }}
-                transition={{ delay: 2.2, duration: 2.3, ease: "easeInOut" }}
-                className="h-[1.5px] bg-gradient-to-r from-transparent via-[#00d2ff] to-transparent mx-auto mt-8 relative shadow-[0_0_15px_#00d2ff]"
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Recover unused/unfinished active examination state overlay */}
+      {/* Recover Session Modal */}
       <AnimatePresence>
         {isResumingExam && (
-          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/50">
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="glass-card p-6 sm:p-8 max-w-sm w-full border border-cyan-500/30 text-center shadow-[0_0_30px_rgba(6,182,212,0.15)]"
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.12 }}
+              className="bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] p-6 max-w-sm w-full text-center shadow-md"
             >
-              <div className="w-14 h-14 bg-cyan-500/10 text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-cyan-500/20">
-                <RotateCcw size={26} className="animate-spin" style={{ animationDuration: '5s' }} />
+              <div className="w-12 h-12 bg-[var(--muted)] text-[var(--primary)] rounded-full flex items-center justify-center mx-auto mb-3">
+                <RotateCcw size={22} />
               </div>
-              <h3 className="text-lg font-black uppercase tracking-tight text-white mb-2">Restore Backup Exam?</h3>
-              <p className="text-xs sm:text-sm text-zinc-400 mb-6 leading-relaxed">The AI firewall detected an unexpected session termination. Do you want to resume your current exam context?</p>
-              <div className="flex gap-3">
+              <h3 className="text-base font-bold text-[var(--foreground)] mb-1">Restore Backup Exam?</h3>
+              <p className="text-xs text-[var(--muted-foreground)] mb-5 leading-relaxed">An unfinished session was detected. Would you like to resume your current exam context?</p>
+              <div className="flex gap-2.5">
                 <button 
                   onClick={() => {
                     localStorage.removeItem('nst_assessment_key_v2');
                     setIsResumingExam(false);
-                    triggerInstantToast("Backup logs recycled. Begin first pass.", "info");
+                    triggerInstantToast("Previous session discarded", "info");
                   }}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 font-bold text-xs uppercase tracking-wider transition-all cursor-pointer text-zinc-400"
+                  className="btn-secondary flex-1 py-2 text-xs cursor-pointer"
                 >
                   Discard
                 </button>
                 <button 
                   onClick={initRestoredSession}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.5)] text-black font-extrabold text-xs uppercase tracking-wider transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                  className="btn-primary flex-1 py-2 text-xs cursor-pointer"
                 >
                   Restore
                 </button>
@@ -1222,150 +852,94 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Cyber/Interactive Main Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 bg-[#040813]/80 backdrop-blur-md border-b border-white/5 p-4 md:px-8 flex items-center justify-between no-print">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-cyan-950/40 border border-cyan-400/30 rounded-xl flex items-center justify-center shadow-md transform hover:rotate-12 transition-transform select-none">
-            <Cpu size={18} className="text-cyan-400 animate-pulse" />
+      {/* Slim, Sticky Top Header: logo + "NS TECHNOLOGY" only, background --background, bottom border --border */}
+      <header className="sticky top-0 left-0 right-0 z-40 bg-[var(--background)] border-b border-[var(--border)] px-4 sm:px-6 py-3 flex items-center justify-between no-print shadow-none">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-[var(--radius)] bg-[var(--muted)] border border-[var(--border)] flex items-center justify-center text-[var(--primary)] shrink-0">
+            <Cpu size={15} />
           </div>
-          <div className="text-left">
-            <h1 className="text-sm font-black tracking-tight tracking-wider text-white uppercase sm:text-base">NS TECHNOLOGY</h1>
-            <p className="text-[9px] text-cyan-400 font-mono tracking-widest leading-none">AI CORE PORTAL v2.4</p>
-          </div>
+          <span className="text-sm font-bold tracking-[0.04em] text-[var(--foreground)] uppercase whitespace-nowrap">
+            NS TECHNOLOGY
+          </span>
         </div>
 
-        {/* Current status display inside ongoing assessments */}
+        {/* Status in quiz */}
         {activeTab === 'exam' && examStep === 'quiz' && (
-          <div className="flex items-center gap-3 bg-[#0a1020] border border-cyan-500/20 px-3 py-1.5 rounded-full">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-            <span className="text-[10px] md:text-xs font-mono text-zinc-300 font-semibold truncate max-w-[80px] md:max-w-none uppercase">
-              {userData.name}
-            </span>
-            <div className="h-3 w-px bg-white/10" />
-            <span className="text-[10px] md:text-xs font-mono text-cyan-400 font-bold">
-              {calculateRemainingSecondsTime(totalTimeTaken)}
-            </span>
+          <div className="flex items-center gap-2 px-2.5 py-1 rounded-[var(--radius)] bg-[var(--muted)]/50 border border-[var(--border)] text-xs font-bold">
+            <span className="text-[var(--muted-foreground)] truncate max-w-[90px] sm:max-w-none">{userData.name}</span>
+            <span className="text-[var(--border)]">·</span>
+            <span className="text-[var(--primary)] font-mono tabular-nums">{calculateRemainingSecondsTime(totalTimeTaken)}</span>
           </div>
         )}
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <button 
             onClick={() => setSoundToggle(!soundToggle)}
-            className="p-2 hover:bg-white/5 text-zinc-400 hover:text-white rounded-xl transition-all cursor-pointer"
-            title="Toggle Sound Effects Feedback"
+            className="p-2 text-[var(--muted-foreground)] hover:text-[var(--foreground)] rounded-[var(--radius)] hover:bg-[var(--muted)] transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+            title="Toggle Sound Effects"
+            aria-label="Toggle Sound Effects"
           >
-            {soundToggle ? <Volume2 size={18} /> : <VolumeX size={18} />}
+            {soundToggle ? <Volume2 size={17} /> : <VolumeX size={17} />}
           </button>
         </div>
       </header>
 
-      {/* Screen Frame Content Wrapper */}
-      <main className="pt-24 pb-8 px-4 flex flex-col items-center justify-center relative z-10">
+      {/* Main Content Area with Instant App-Like Page Switching (max 150ms fade) */}
+      <main className="pt-6 sm:pt-10 px-4 max-w-3xl mx-auto w-full flex flex-col items-center">
         <AnimatePresence mode="wait">
           {/* ====================================================
-              1. HOME PAGE COMPONENT TABVIEW
+              1. HOME PAGE
               ==================================================== */}
           {activeTab === 'home' && (
             <motion.div 
               key="home-screen"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -30 }}
-              transition={{ duration: 0.4 }}
-              className="max-w-5xl w-full space-y-12 text-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.12 }}
+              className="w-full space-y-6 text-center"
             >
-              {/* Epic Cyberpunk Hero Headline with Aurora Animated Glows inside a Premium glassmorphic hero container */}
-              <div className="glass-card max-w-4xl mx-auto p-8 sm:p-12 md:p-16 relative overflow-hidden space-y-8 shadow-[0_0_50px_rgba(0,0,0,0.8)] border border-white/10">
-                {/* Floating Aurora Light Effect Layers */}
-                <div className="absolute -top-12 -left-12 w-96 h-96 rounded-full bg-cyan-500/15 blur-[100px] pointer-events-none animate-pulse" />
-                <div className="absolute -bottom-12 -right-12 w-96 h-96 rounded-full bg-purple-500/15 blur-[100px] pointer-events-none animate-pulse-slow" />
-                
-                {/* Premium Floating Particles inside Hero Container */}
-                <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-30 z-0">
-                  {[...Array(8)].map((_, i) => (
-                    <motion.div
-                      key={i}
-                      className="absolute w-1 rounded-full bg-cyan-400 blur-[0.5px]"
-                      style={{
-                        height: Math.random() * 3 + 2,
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`,
-                        boxShadow: '0 0 6px #00d2ff',
-                      }}
-                      animate={{
-                        y: [0, -30, 0],
-                        opacity: [0.3, 0.8, 0.3],
-                      }}
-                      transition={{
-                        duration: Math.random() * 5 + 4,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                        delay: Math.random() * 2,
-                      }}
-                    />
-                  ))}
-                </div>
+              {/* Claude Crimson Hero Card */}
+              <div className="crimson-card p-6 sm:p-10 space-y-6 text-center">
+                <div className="space-y-3">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[var(--radius)] bg-[var(--muted)] border border-[var(--border)] text-[var(--muted-foreground)] text-[12px] font-bold tracking-[0.04em] uppercase">
+                    <span>Advanced Assessment Platform</span>
+                  </div>
 
-                <div className="space-y-4 relative z-10">
-                  <span className="bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px] sm:text-xs font-mono font-bold tracking-[0.2em] uppercase px-4 py-1.5 rounded-full inline-block mx-auto shadow-md">
-                    ADVANCED COGNITIVE ASSESSMENT PLATFORM
-                  </span>
-
-                  <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-tight uppercase font-serif drop-shadow-[0_0_15px_rgba(0,210,255,0.25)]">
-                    <motion.span
-                      initial={{ opacity: 0, y: 15 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6 }}
-                      className="block"
-                    >
-                      NS TECHNOLOGY
-                    </motion.span>
-                    <motion.span
-                      initial={{ opacity: 0, y: 15 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6, delay: 0.15 }}
-                      className="bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-500 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(6,182,212,0.3)] block mt-1"
-                    >
-                      AI EXAMINATION PORTAL
-                    </motion.span>
+                  <h1 className="text-[clamp(1.75rem,5vw,2.75rem)] font-bold text-[var(--foreground)] leading-tight tracking-tight">
+                    NS Technology <span className="text-[var(--primary)]">Exam Portal</span>
                   </h1>
 
-                  <p className="max-w-2xl mx-auto text-xs sm:text-sm text-cyan-400 font-bold tracking-[0.15em] uppercase font-mono">
-                    Secure • Intelligent • Futuristic Online Examination Experience
+                  <p className="text-[12px] text-[var(--muted-foreground)] font-bold tracking-[0.05em] uppercase">
+                    Secure • Intelligent • Online Examination Experience
                   </p>
                 </div>
 
-                <div className="h-8 max-w-xl mx-auto flex items-center justify-center font-mono text-xs text-zinc-400 tracking-wider relative z-10">
-                  <span className="border-r-2 border-cyan-400 pr-1.5 animate-pulse text-white/90 font-mono">
-                    STATUS: {typingText || "INITIALIZING SYLLABUS GATEWAY..."}
-                  </span>
-                </div>
-
-                <p className="max-w-2xl mx-auto text-sm sm:text-base text-zinc-400 font-medium leading-relaxed font-serif relative z-10">
-                  A modern AI-powered examination platform with secure assessments, smart analytics, anti-cheat protection, and immersive user experience.
+                <p className="max-w-xl mx-auto text-[15px] text-[var(--foreground)] leading-[1.65]">
+                  A modern AI-powered examination platform with secure assessments, smart analytics, anti-cheat protection, and seamless user experience.
                 </p>
 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+                <div className="flex flex-col sm:flex-row gap-3 justify-center items-center pt-2">
                   <button 
                     onClick={() => {
                       synthSvc.playClick();
                       setActiveTab('exam');
                       setExamStep('gate');
                     }}
-                    className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 text-white text-xs uppercase tracking-widest font-black shadow-[0_0_30px_rgba(6,182,212,0.45)] transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 cursor-pointer border border-cyan-400/30"
+                    className="btn-primary w-full sm:w-auto px-6 py-2.5 cursor-pointer min-h-[44px]"
                     id="cta-start-exam"
                   >
-                    Start Exam <Zap size={14} />
+                    Start Exam <Zap size={15} />
                   </button>
                   <button 
                     onClick={() => {
                       synthSvc.playClick();
                       setActiveTab('faq');
                     }}
-                    className="w-full sm:w-auto px-8 py-3.5 rounded-xl border border-white/10 hover:border-cyan-500/35 hover:bg-cyan-500/5 text-zinc-300 hover:text-white text-xs uppercase tracking-widest font-black transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                    className="btn-secondary w-full sm:w-auto px-6 py-2.5 cursor-pointer min-h-[44px]"
                     id="cta-explore-portal"
                   >
-                    Explore Portal <ChevronRight size={14} />
+                    Explore Portal <ChevronRight size={15} />
                   </button>
                 </div>
               </div>
@@ -1373,34 +947,37 @@ export default function App() {
           )}
 
           {/* ====================================================
-              2. EXAM MODULE INTERACTIVE AREA
+              2. EXAM MODULE
               ==================================================== */}
           {activeTab === 'exam' && (
             <motion.div 
               key="exam-screen"
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.98 }}
-              className="max-w-5xl w-full"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.12 }}
+              className="w-full"
             >
-              {/* Exam Step: Gate Screen Passcode Authentication */}
+              {/* Step: Gate Authentication */}
               {examStep === 'gate' && (
                 <div className="max-w-md w-full mx-auto">
-                  <div className="glass-card p-8 border border-white/10 text-center relative overflow-hidden shadow-2xl">
-                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
-                    
-                    <div className="mb-8 space-y-2">
-                      <div className="w-14 h-14 rounded-full bg-cyan-950/40 border border-cyan-400/30 flex items-center justify-center mx-auto mb-4 hover:border-cyan-400 transition-colors">
-                        <Lock size={22} className="text-cyan-400" />
+                  <div className="crimson-card p-6 sm:p-8 text-center space-y-5">
+                    <div className="space-y-2">
+                      <div className="w-12 h-12 rounded-[var(--radius)] bg-[var(--muted)] border border-[var(--border)] text-[var(--primary)] flex items-center justify-center mx-auto mb-2">
+                        <Lock size={20} />
                       </div>
-                      <h2 className="text-xl sm:text-2xl font-black uppercase text-white tracking-wider">SECURE ASSESSMENT GATEWAY</h2>
-                      <p className="text-xs text-zinc-400 max-w-xs mx-auto">Input registration credentials to authorize and launch the evaluation matrix.</p>
+                      <h2 className="text-[clamp(1.1rem,3vw,1.4rem)] font-bold text-[var(--foreground)]">
+                        Secure Assessment Gateway
+                      </h2>
+                      <p className="text-[13px] text-[var(--muted-foreground)] max-w-xs mx-auto">
+                        Input registration credentials to authorize and launch the evaluation matrix.
+                      </p>
                     </div>
 
-                    <form onSubmit={processSecureExamEntry} className="space-y-5 text-left">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest flex items-center gap-1.5 label-input-header">
-                          <User size={12} className="text-cyan-400" /> EXAMINEE FULL NAME
+                    <form onSubmit={processSecureExamEntry} className="space-y-4 text-left">
+                      <div className="space-y-1">
+                        <label className="crimson-label uppercase flex items-center gap-1.5">
+                          <User size={12} className="text-[var(--primary)]" /> Examinee Full Name
                         </label>
                         <input 
                           type="text"
@@ -1408,32 +985,32 @@ export default function App() {
                           placeholder="e.g. Suraj Rawat"
                           value={userData.name}
                           onChange={(e) => setUserData(prev => ({ ...prev, name: e.target.value }))}
-                          className="input-field w-full text-xs hover:border-white/25 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-[#0e1425] transition-all bg-[#080d19] py-3.5"
+                          className="crimson-input w-full"
                           id="name-credential-field"
                         />
                       </div>
 
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest flex items-center gap-1.5 label-input-header">
-                          <BookOpen size={12} className="text-cyan-400" /> ACADEMIC SYLLABUS PATH
+                      <div className="space-y-1">
+                        <label className="crimson-label uppercase flex items-center gap-1.5">
+                          <BookOpen size={12} className="text-[var(--primary)]" /> Academic Syllabus Path
                         </label>
                         <div className="relative">
                           <select 
                             value={userData.course}
                             onChange={(e) => setUserData(prev => ({ ...prev, course: e.target.value as any }))}
-                            className="input-field w-full text-xs appearance-none pr-10 cursor-pointer hover:border-white/25 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-[#0e1425] transition-all bg-[#080d19] py-3.5"
+                            className="crimson-input w-full appearance-none pr-9 cursor-pointer"
                           >
                             <option value="Basic Computer">Basic Computer (NSTECHBASIC)</option>
                             <option value="Tally">Tally ERP / Prime (NSTECHTALLY)</option>
                             <option value="Web Designing">Web Designing (NSTECHWEB)</option>
                           </select>
-                          <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
+                          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] pointer-events-none" />
                         </div>
                       </div>
 
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest flex items-center gap-1.5 label-input-header">
-                          <Lock size={12} className="text-cyan-400" /> SECURE GATE VERIFICATION KEY
+                      <div className="space-y-1">
+                        <label className="crimson-label uppercase flex items-center gap-1.5">
+                          <Lock size={12} className="text-[var(--primary)]" /> Secure Gate Verification Key
                         </label>
                         <div className="relative">
                           <input 
@@ -1442,7 +1019,7 @@ export default function App() {
                             placeholder="Input verification passcode"
                             value={userData.password}
                             onChange={(e) => setUserData(prev => ({ ...prev, password: e.target.value }))}
-                            className="input-field w-full text-xs pr-12 hover:border-white/25 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 focus:bg-[#0e1425] transition-all bg-[#080d19] py-3.5 font-mono"
+                            className="crimson-input w-full pr-10 font-mono"
                             id="passcode-credential-field"
                           />
                           <button
@@ -1451,198 +1028,158 @@ export default function App() {
                               synthSvc.playClick();
                               setShowPassword(!showPassword);
                             }}
-                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-cyan-400 transition-all duration-200 focus:outline-none cursor-pointer p-1.5 flex items-center justify-center rounded-lg hover:bg-white/5 active:scale-90"
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] hover:text-[var(--foreground)] p-1.5"
                             title={showPassword ? "Mask Passcode" : "Unmask Passcode"}
+                            aria-label={showPassword ? "Mask Passcode" : "Unmask Passcode"}
                           >
-                            {showPassword ? <EyeOff size={15} className="transition-transform duration-300 rotate-180" /> : <Eye size={15} className="transition-transform duration-300" />}
+                            {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                           </button>
                         </div>
                       </div>
 
                       <button 
                         type="submit"
-                        className="w-full mt-4 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 text-white font-black text-xs uppercase tracking-widest transition-all hover:scale-102 active:scale-98 cursor-pointer shadow-[0_0_20px_rgba(6,182,212,0.25)] flex items-center justify-center gap-2 border border-cyan-400/20"
+                        className="btn-primary w-full mt-2 py-2.5 cursor-pointer min-h-[44px]"
                         id="form-secure-auth-btn"
                       >
-                        VALIDATE SECURE KEY <ChevronRight size={14} />
+                        Validate Secure Key <ChevronRight size={15} />
                       </button>
                     </form>
                   </div>
                 </div>
               )}
 
-              {/* Exam Step: ACTIVE CHRONOS ASSESSMENT CANVAS */}
+              {/* Step: Quiz Screen (Single column on mobile, sticky timer, large options) */}
               {examStep === 'quiz' && (
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 text-left">
-                  {/* HUD Dashboard Navigation sidebar */}
-                  <div className="hidden lg:block space-y-4">
-                    <div className="glass-card p-5 border border-white/5 sticky top-24 space-y-4 shadow-lg">
-                      <h4 className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 font-mono flex items-center gap-2">
-                        <Hash size={12} className="text-cyan-400" /> NAVIGATION INDEX
-                      </h4>
-                      <div className="grid grid-cols-4 gap-2">
-                        {currentExamQuestions.map((_, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => {
-                              synthSvc.playClick();
-                              setCurrentQuestionIndex(idx);
-                              setQuestionTimeLeft(60);
-                            }}
-                            className={`w-9 h-9 rounded-lg font-mono text-xs font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer flex items-center justify-center border
-                              ${currentQuestionIndex === idx ? 'bg-cyan-500 border-cyan-400 text-black shadow-[0_0_10px_rgba(6,182,212,0.4)]' : 
-                                answers[idx] ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' : 
-                                'bg-white/5 border-white/10 text-zinc-500 hover:border-zinc-400 hover:text-white'}`}
-                          >
-                            {(idx + 1).toString().padStart(2, '0')}
-                          </button>
-                        ))}
+                <div className="w-full space-y-4 text-left">
+                  {/* Sticky Timer Bar */}
+                  <div className="sticky top-14 z-30 bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] p-3 flex items-center justify-between shadow-sm">
+                    <div className="flex items-center gap-3">
+                      <div className={`px-2.5 py-1 rounded-[var(--radius)] text-xs font-mono font-bold flex items-center gap-1.5 tabular-nums border
+                        ${questionTimeLeft <= 15 ? 'bg-[var(--error)] text-white border-[var(--error)]' : 'bg-[var(--muted)] text-[var(--primary)] border-[var(--border)]'}`}
+                      >
+                        <Timer size={13} />
+                        <span>{questionTimeLeft}s</span>
                       </div>
-
-                      <div className="pt-4 border-t border-white/5 space-y-2 text-[10px] text-zinc-400">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
-                          <span>Active Assessment Node</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500/30 border border-emerald-500" />
-                          <span>Response Vector Encoded</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-white/5 border border-white/10" />
-                          <span>Unexecuted Target</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Operational Question Content frame */}
-                  <div className="lg:col-span-3 space-y-4">
-                    {/* Urgency warning HUD heartbeat banner */}
-                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#050914] p-3 rounded-2xl border border-white/5">
-                      <div className="flex items-center gap-3">
-                        <div className={`px-4 py-1.5 rounded-lg font-mono text-sm font-black tracking-tight border flex items-center gap-2
-                          ${questionTimeLeft <= 15 ? 'bg-rose-500/10 border-rose-500/30 text-rose-400 animate-pulse' : 'bg-white/5 border-white/10 text-cyan-400'}`}
-                        >
-                          <Timer size={14} className={questionTimeLeft <= 15 ? 'animate-spin' : ''} style={{ animationDuration: '4s' }} />
-                          <span>{questionTimeLeft}s</span>
-                        </div>
-                        
-                        <p className="text-[10px] sm:text-xs font-mono font-bold text-zinc-300 tracking-wider uppercase">
-                          QUESTION {currentQuestionIndex + 1} of {currentExamQuestions.length}
-                        </p>
-                      </div>
-
-                      {/* HUD dynamic prompt indicator */}
-                      <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider text-[#00d2ff] bg-cyan-500/10 border border-cyan-500/20 px-3 py-1 rounded-full text-center">
-                        {hudPrompt}
+                      
+                      <span className="text-xs font-bold text-[var(--foreground)]">
+                        Question {currentQuestionIndex + 1} of {currentExamQuestions.length}
                       </span>
                     </div>
 
-                    {/* Core Quiz Content card */}
-                    <div className="glass-card p-6 sm:p-8 md:p-10 border border-white/5 relative overflow-hidden text-left glow-border min-h-[400px] flex flex-col justify-between">
-                      {/* Top horizontal timeline tracker */}
-                      <div className="absolute top-0 left-0 right-0 h-1 bg-white/5">
-                        <div 
-                          className="h-full bg-gradient-to-r from-cyan-400 to-indigo-500 transition-all duration-300 shadow-[0_0_12px_rgba(6,182,212,0.5)]"
-                          style={{ width: `${((currentQuestionIndex + 1) / currentExamQuestions.length) * 100}%` }}
-                        />
+                    <span className="text-[12px] text-[var(--muted-foreground)] font-bold px-2 py-0.5 rounded-[var(--radius)] bg-[var(--muted)] border border-[var(--border)] hidden sm:inline-block">
+                      {hudPrompt}
+                    </span>
+                  </div>
+
+                  {/* Main Single-Column Question Layout */}
+                  <div className="crimson-card p-5 sm:p-7 relative overflow-hidden flex flex-col justify-between min-h-[340px]">
+                    {/* Top Progress Line */}
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-[var(--muted)]">
+                      <div 
+                        className="h-full bg-[var(--primary)] transition-all duration-200"
+                        style={{ width: `${((currentQuestionIndex + 1) / currentExamQuestions.length) * 100}%` }}
+                      />
+                    </div>
+
+                    <div className="space-y-4 pt-1">
+                      <div className="text-[12px] font-bold text-[var(--primary)] flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--primary)]" />
+                        <span>{motivationalAIMessage}</span>
                       </div>
 
-                      {/* Animated AI Motivational Message in Compact Minimal Popup Style with Neon Glow */}
-                      <div className="mt-4">
-                        <AnimatePresence mode="wait">
-                          <motion.div 
-                            key={motivationalAIMessage}
-                            initial={{ opacity: 0, y: -8, scale: 0.96 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                            transition={{ duration: 0.25 }}
-                            className="p-2.5 rounded-xl bg-cyan-950/20 border border-cyan-400/30 text-cyan-400 font-mono text-[10px] sm:text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(6,182,212,0.15)] select-none"
+                      <h2 className="text-base sm:text-lg font-bold text-[var(--foreground)] leading-relaxed">
+                        {currentExamQuestions[currentQuestionIndex].question}
+                      </h2>
+
+                      {/* Large Tappable Options (min 48px) */}
+                      <div className="grid grid-cols-1 gap-2.5 pt-1">
+                        {currentExamQuestions[currentQuestionIndex].options.map((option, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => handleSelectResponse(option)}
+                            className={`w-full p-3.5 sm:p-4 rounded-[var(--radius)] border text-left text-[15px] font-medium flex items-center gap-3 transition-colors cursor-pointer min-h-[48px]
+                              ${answers[currentQuestionIndex] === option 
+                                ? 'bg-[var(--accent)]/30 border-[var(--primary)] text-[var(--foreground)] font-bold' 
+                                : 'bg-[var(--card)] border-[var(--border)] hover:border-[var(--ring)] text-[var(--foreground)]'}`}
                           >
-                            <Sparkles size={11} className="text-cyan-400 animate-pulse" />
-                            <span>{motivationalAIMessage}</span>
-                          </motion.div>
-                        </AnimatePresence>
-                      </div>
-
-                      {/* Question Text details */}
-                      <div className="space-y-6 pt-4 mb-8">
-                        <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-relaxed">
-                          {currentExamQuestions[currentQuestionIndex].question}
-                        </h2>
-
-                        <div className="grid grid-cols-1 gap-4">
-                          {currentExamQuestions[currentQuestionIndex].options.map((option, idx) => (
-                            <button
-                              key={idx}
-                              onClick={() => handleSelectResponse(option)}
-                              className={`w-full p-4 sm:p-5 rounded-xl border text-left text-sm sm:text-base font-medium flex items-center gap-4 transition-all hover:scale-[1.01] cursor-pointer
-                                ${answers[currentQuestionIndex] === option 
-                                  ? 'bg-[#0f2142] border-cyan-500/40 text-white shadow-[0_0_20px_rgba(6,182,212,0.15)] glow-border bounce-on-select' 
-                                  : 'bg-white/5 border-white/10 hover:border-white/20 text-zinc-300 hover:text-white hover:bg-white/[0.08]'}`}
-                            >
-                              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors
-                                ${answers[currentQuestionIndex] === option ? 'border-cyan-400 bg-cyan-500' : 'border-zinc-500'}`}>
-                                {answers[currentQuestionIndex] === option && (
-                                  <div className="w-1.5 h-1.5 bg-black rounded-full" />
-                                )}
-                              </div>
-                              <span className="flex-1">{option}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Frame Actions control row on large environments */}
-                      <div className="flex items-center justify-between pt-6 border-t border-white/5">
-                        <button 
-                          disabled={currentQuestionIndex === 0}
-                          onClick={triggerProceedPrevious}
-                          className="px-5 py-2.5 rounded-xl border border-white/10 hover:border-cyan-500/30 hover:bg-cyan-500/5 text-zinc-400 hover:text-white text-xs font-bold uppercase tracking-wider transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex items-center gap-2"
-                        >
-                          <ChevronLeft size={14} /> Previous
-                        </button>
-
-                        <button 
-                          onClick={triggerProceedNext}
-                          className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 text-white font-black text-xs uppercase tracking-wider shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] border border-cyan-400/20 hover:border-cyan-400/50 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-2"
-                        >
-                          {currentQuestionIndex === currentExamQuestions.length - 1 ? 'Submit Exam' : 'Next'} <ChevronRight size={14} />
-                        </button>
+                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-colors
+                              ${answers[currentQuestionIndex] === option ? 'border-[var(--primary)] bg-[var(--primary)]' : 'border-[var(--muted-foreground)]'}`}>
+                              {answers[currentQuestionIndex] === option && (
+                                <div className="w-1.5 h-1.5 bg-[var(--primary-foreground)] rounded-full" />
+                              )}
+                            </div>
+                            <span className="flex-1 leading-snug">{option}</span>
+                          </button>
+                        ))}
                       </div>
                     </div>
+
+                    {/* Desktop Inline Actions */}
+                    <div className="hidden sm:flex items-center justify-between pt-5 mt-5 border-t border-[var(--border)]">
+                      <button 
+                        disabled={currentQuestionIndex === 0}
+                        onClick={triggerProceedPrevious}
+                        className="btn-secondary py-2 px-4 text-xs disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                      >
+                        <ChevronLeft size={14} /> Previous
+                      </button>
+
+                      <button 
+                        onClick={triggerProceedNext}
+                        className="btn-primary py-2 px-5 text-xs cursor-pointer"
+                      >
+                        {currentQuestionIndex === currentExamQuestions.length - 1 ? 'Submit Exam' : 'Next'} <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Sticky Mobile Next/Submit Action Bar above the bottom tab bar */}
+                  <div className="sm:hidden sticky bottom-16 z-30 bg-[var(--background)] border-t border-[var(--border)] p-3 -mx-4 flex items-center justify-between gap-3 shadow-sm">
+                    <button 
+                      disabled={currentQuestionIndex === 0}
+                      onClick={triggerProceedPrevious}
+                      className="btn-secondary flex-1 py-2.5 text-xs disabled:opacity-40 min-h-[44px]"
+                    >
+                      <ChevronLeft size={14} /> Previous
+                    </button>
+                    <button 
+                      onClick={triggerProceedNext}
+                      className="btn-primary flex-1 py-2.5 text-xs min-h-[44px]"
+                    >
+                      {currentQuestionIndex === currentExamQuestions.length - 1 ? 'Submit Exam' : 'Next'} <ChevronRight size={14} />
+                    </button>
                   </div>
                 </div>
               )}
 
-              {/* Exam Step: Secure Review metrics ledger */}
+              {/* Step: Review Metrics */}
               {examStep === 'review' && (
-                <div className="max-w-3xl w-full mx-auto text-left">
-                  <div className="glass-card p-6 sm:p-10 border border-white/5 relative overflow-hidden glow-border">
-                    <div className="absolute top-0 right-0 w-44 h-44 bg-cyan-500/5 blur-[50px]" />
-                    
-                    <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white uppercase text-center mb-1">
-                      Cognitive Review Ledger
-                    </h2>
-                    <p className="text-xs text-zinc-400 text-center mb-8">Confirm correct answer allocations before compiling grade metrics.</p>
+                <div className="max-w-2xl w-full mx-auto text-left">
+                  <div className="crimson-card p-6 sm:p-8 space-y-6">
+                    <div className="text-center space-y-1">
+                      <h2 className="text-[clamp(1.1rem,3vw,1.4rem)] font-bold text-[var(--foreground)]">
+                        Cognitive Review Ledger
+                      </h2>
+                      <p className="text-xs text-[var(--muted-foreground)]">Confirm correct answer allocations before compiling grade metrics.</p>
+                    </div>
 
-                    <div className="grid grid-cols-2 gap-4 mb-8">
-                      <div className="bg-emerald-500/5 border border-emerald-500/15 p-4 rounded-xl text-center">
-                        <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest font-bold">Responses Encoded</span>
-                        <p className="text-3xl font-black text-white font-mono mt-1">
+                    <div className="grid grid-cols-2 gap-3 text-center">
+                      <div className="bg-[var(--muted)]/50 border border-[var(--border)] p-3.5 rounded-[var(--radius)]">
+                        <span className="text-[12px] text-[var(--muted-foreground)] font-bold uppercase tracking-[0.04em] block">Responses Encoded</span>
+                        <p className="text-2xl font-bold text-[var(--primary)] font-mono mt-1">
                           {Object.keys(answers).length}
                         </p>
                       </div>
-                      <div className="bg-rose-500/5 border border-rose-500/15 p-4 rounded-xl text-center">
-                        <span className="text-[10px] font-mono text-rose-400 uppercase tracking-widest font-bold">Pending Index Tasks</span>
-                        <p className="text-3xl font-black text-white font-mono mt-1">
+                      <div className="bg-[var(--muted)]/50 border border-[var(--border)] p-3.5 rounded-[var(--radius)]">
+                        <span className="text-[12px] text-[var(--muted-foreground)] font-bold uppercase tracking-[0.04em] block">Pending Tasks</span>
+                        <p className="text-2xl font-bold text-[var(--error)] font-mono mt-1">
                           {currentExamQuestions.length - Object.keys(answers).length}
                         </p>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-5 sm:grid-cols-10 gap-2 mb-8 max-w-xl mx-auto">
+                    <div className="grid grid-cols-5 sm:grid-cols-10 gap-2 max-w-lg mx-auto">
                       {currentExamQuestions.map((_, idx) => (
                         <button
                           key={idx}
@@ -1652,15 +1189,15 @@ export default function App() {
                             setExamStep('quiz');
                             setQuestionTimeLeft(60);
                           }}
-                          className={`w-10 h-10 rounded-lg flex items-center justify-center font-mono text-xs font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer
-                            ${answers[idx] ? 'bg-cyan-500 text-black shadow-[0_0_8px_rgba(6,182,212,0.4)]' : 'bg-white/5 border border-white/10 text-zinc-500 hover:border-zinc-400'}`}
+                          className={`h-9 rounded-[var(--radius)] flex items-center justify-center font-mono text-xs font-bold transition-colors cursor-pointer border
+                            ${answers[idx] ? 'bg-[var(--primary)] border-[var(--primary)] text-[var(--primary-foreground)]' : 'bg-[var(--card)] border-[var(--border)] text-[var(--muted-foreground)] hover:border-[var(--ring)]'}`}
                         >
                           {idx + 1}
                         </button>
                       ))}
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <div className="flex flex-col sm:flex-row gap-2.5 justify-center pt-2">
                       <button 
                         onClick={() => {
                           synthSvc.playClick();
@@ -1668,7 +1205,7 @@ export default function App() {
                           setExamStep('quiz');
                           setQuestionTimeLeft(60);
                         }}
-                        className="px-6 py-3 rounded-xl border border-white/10 hover:bg-white/5 justify-center font-bold text-xs uppercase tracking-wider text-zinc-400 hover:text-white transition-all cursor-pointer flex items-center gap-2"
+                        className="btn-secondary py-2.5 px-4 text-xs cursor-pointer min-h-[44px]"
                       >
                         <ChevronLeft size={14} /> Returns to Canvas
                       </button>
@@ -1677,11 +1214,11 @@ export default function App() {
                           const unanswered = currentExamQuestions.length - Object.keys(answers).length;
                           if (unanswered > 0) {
                             synthSvc.playAlert();
-                            triggerInstantToast(`Secure notice: You have ${unanswered} answers unencoded!`, "warning");
+                            triggerInstantToast(`Notice: You have ${unanswered} answers unencoded`, "warning");
                           }
                           setShowSubmitModal(true);
                         }}
-                        className="px-8 py-3 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 text-white font-black text-xs uppercase tracking-wider shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all hover:scale-105 active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                        className="btn-primary py-2.5 px-5 text-xs cursor-pointer min-h-[44px]"
                       >
                         Transmit Final Submission <CheckCircle2 size={14} />
                       </button>
@@ -1690,386 +1227,300 @@ export default function App() {
                 </div>
               )}
 
-              {/* Exam Step: Cinematic DECIPHERING Scanning Screen */}
+              {/* Step: Scanning Screen */}
               {examStep === 'scanning' && (
                 <div className="max-w-md w-full mx-auto">
-                  <div className="glass-card p-6 sm:p-10 border border-white/5 text-center relative overflow-hidden glow-border">
-                    {/* Laser vertical sweeping line */}
-                    <div className="absolute inset-x-0 h-0.5 bg-cyan-400 shadow-[0_0_15px_rgba(6,182,212,1)] animate-bounce" style={{ animationDuration: '2.5s' }} />
-                    
-                    <div className="mb-8 space-y-3">
-                      <Cpu size={40} className="text-cyan-400 mx-auto animate-spin" style={{ animationDuration: '3s' }} />
-                      <h2 className="text-lg sm:text-xl font-black uppercase tracking-tight text-white">Compiling Cognitive Marks</h2>
-                      <p className="text-xs text-zinc-500">Security container verification in process...</p>
+                  <div className="crimson-card p-6 sm:p-8 text-center space-y-6">
+                    <div className="w-12 h-12 rounded-[var(--radius)] bg-[var(--muted)] border border-[var(--border)] text-[var(--primary)] flex items-center justify-center mx-auto">
+                      <Cpu size={22} className="animate-pulse" />
+                    </div>
+                    <div className="space-y-1">
+                      <h2 className="text-base font-bold text-[var(--foreground)]">Compiling Cognitive Marks</h2>
+                      <p className="text-xs text-[var(--muted-foreground)]">{scanningStatus}</p>
                     </div>
 
-                    <div className="space-y-4">
-                      <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden relative border border-white/5 shadow-md">
+                    <div className="space-y-2">
+                      <div className="h-2 w-full bg-[var(--muted)] rounded-[var(--radius)] overflow-hidden">
                         <div 
-                          className="h-full bg-gradient-to-r from-cyan-400 to-purple-600 transition-all duration-150"
+                          className="h-full bg-[var(--primary)] transition-all duration-150"
                           style={{ width: `${scanningProgress}%` }}
                         />
                       </div>
-                      <div className="flex justify-between font-mono text-[9px] text-zinc-400">
-                        <span className="animate-pulse">{scanningStatus}</span>
-                        <span className="text-cyan-400 font-bold">{scanningProgress}%</span>
+                      <div className="flex justify-between font-mono text-xs text-[var(--muted-foreground)]">
+                        <span>Auditing logs</span>
+                        <span className="text-[var(--primary)] font-bold">{scanningProgress}%</span>
                       </div>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Exam Step: Cyberpunk Cinematic Results Dashboard */}
+              {/* Step: Results Dashboard */}
               {examStep === 'result' && (
                 isDrumrollActive ? (
-                  <div className="max-w-md w-full mx-auto space-y-6 text-center py-12 relative z-20" id="examination-drumroll-loader">
-                    <div className="glass-card p-8 border border-cyan-500/30 shadow-[0_0_35px_rgba(6,182,212,0.15)] space-y-6 relative overflow-hidden">
-                      <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-cyan-500/10 blur-3xl text-cyan-400" />
-                      <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-purple-500/10 blur-3xl text-purple-400" />
-                      
-                      <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
-                        <div className="absolute inset-0 border-4 border-dashed border-cyan-400/40 rounded-full animate-spin" style={{ animationDuration: '3s' }} />
-                        <div className="absolute inset-2 border-2 border-dotted border-purple-500/50 rounded-full animate-spin" style={{ animationDuration: '1.5s', animationDirection: 'reverse' }} />
-                        <Trophy size={40} className="text-cyan-400 animate-bounce" />
-                      </div>
-                      <div className="space-y-2">
-                        <h3 className="text-lg font-mono font-black tracking-widest text-[#00d2ff] uppercase animate-pulse">
-                          CALIBRATING GRADE VECTORS
-                        </h3>
-                        <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest max-w-xs mx-auto leading-relaxed">
-                          Assembling blockchain hashes... Decrypting final proctor credentials... Secure cryptographic certification signature active...
-                        </p>
-                      </div>
-                      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/5 shadow-inner">
+                  <div className="max-w-md w-full mx-auto text-center py-12 space-y-4">
+                    <div className="crimson-card p-8 space-y-4">
+                      <Trophy size={36} className="text-[var(--primary)] mx-auto" />
+                      <h3 className="text-base font-bold text-[var(--foreground)]">Calibrating Grade Vectors</h3>
+                      <p className="text-xs text-[var(--muted-foreground)] leading-relaxed">
+                        Evaluating accuracy and generating certified score parameters...
+                      </p>
+                      <div className="h-1.5 w-full bg-[var(--muted)] rounded-[var(--radius)] overflow-hidden">
                         <motion.div 
-                          className="h-full bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-600 shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                          className="h-full bg-[var(--primary)]"
                           initial={{ width: "0%" }}
                           animate={{ width: "100%" }}
-                          transition={{ duration: 1.5, ease: "linear" }}
+                          transition={{ duration: 1.2, ease: "linear" }}
                         />
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="max-w-4xl w-full mx-auto space-y-6 text-left" id="examination-result-panel">
-                  <div className="glass-card p-6 sm:p-10 border border-white/5 relative overflow-hidden shadow-[0_0_30px_rgba(0,210,255,0.05)] glow-border text-center">
-                    {/* Inner glowing sparks depending on score */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full bg-opacity-20 blur-[90px]" style={{ backgroundColor: themeDetails.metaHex }} />
-                    
-                    <div className="space-y-4 relative z-10 mb-8">
-                      <div className="relative inline-block mx-auto select-none">
-                        {/* Interactive SVG Circular Score Ring */}
-                        <svg className="w-32 h-32 sm:w-36 sm:h-36 transform -rotate-90">
-                          {/* Inner trail track */}
-                          <circle
-                            cx="64"
-                            cy="64"
-                            r="52"
-                            className="stroke-white/10 fill-none"
-                            strokeWidth="6"
-                          />
-                          {/* Active score completion arc */}
-                          <motion.circle
-                            cx="64"
-                            cy="64"
-                            r="52"
-                            className="fill-none"
-                            stroke={themeDetails.metaHex}
-                            strokeWidth="6"
-                            strokeDasharray={2 * Math.PI * 52}
-                            initial={{ strokeDashoffset: 2 * Math.PI * 52 }}
-                            animate={{ strokeDashoffset: 2 * Math.PI * 52 * (1 - score / currentExamQuestions.length) }}
-                            transition={{ duration: 1.5, ease: "easeOut" }}
-                            strokeLinecap="round"
-                          />
-                        </svg>
-                        {/* Centered score contents */}
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <span className="text-3xl sm:text-4xl font-black tracking-tight text-white leading-none">
+                  <div className="max-w-2xl w-full mx-auto space-y-5 text-left">
+                    <div className="crimson-card p-6 sm:p-8 space-y-6 text-center">
+                      <div className="space-y-2">
+                        <div className="inline-flex flex-col items-center justify-center w-28 h-28 rounded-full border-2 border-[var(--primary)] bg-[var(--card)] mx-auto">
+                          <span className="text-3xl font-bold text-[var(--foreground)] font-mono tabular-nums leading-none">
                             {animatedScore}
                           </span>
-                          <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest leading-none mt-1">
+                          <span className="text-[11px] text-[var(--muted-foreground)] font-mono mt-1">
                             OF {currentExamQuestions.length}
                           </span>
                         </div>
+
+                        <h2 className="text-[clamp(1.1rem,3vw,1.4rem)] font-bold text-[var(--foreground)] mt-2">
+                          Grade Calibration Metrics
+                        </h2>
+                        <p className={`text-sm font-bold ${performance.color}`}>
+                          {performance.rank}: {performance.msg}
+                        </p>
                       </div>
 
-                      <h2 className="text-2xl sm:text-3xl font-extrabold uppercase tracking-tight text-white">Grade Calibration Metrics</h2>
-                      <p className={`text-base sm:text-lg font-bold uppercase tracking-wide px-4 py-1 rounded-full ${themeDetails.glowText} glow-text`}>
-                        {performance.rank}: {performance.msg}
-                      </p>
-                    </div>
+                      {/* Accuracy Grid */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-left">
+                        <div className="bg-[var(--muted)]/40 p-3 rounded-[var(--radius)] border border-[var(--border)]">
+                          <BarChart3 size={15} className="text-[var(--muted-foreground)] mb-1" />
+                          <span className="text-[11px] text-[var(--muted-foreground)] font-bold uppercase tracking-[0.04em] block">Grade Accuracy</span>
+                          <p className="text-base font-bold text-[var(--foreground)] font-mono tabular-nums">
+                            {(animatedScore / currentExamQuestions.length * 100).toFixed(1)}%
+                          </p>
+                        </div>
+                        <div className="bg-[var(--muted)]/40 p-3 rounded-[var(--radius)] border border-[var(--border)]">
+                          <Target size={15} className="text-[var(--muted-foreground)] mb-1" />
+                          <span className="text-[11px] text-[var(--muted-foreground)] font-bold uppercase tracking-[0.04em] block">Correct Nodes</span>
+                          <p className="text-base font-bold text-[var(--primary)] font-mono tabular-nums">
+                            {animatedScore} <span className="text-xs text-[var(--muted-foreground)]">/ {currentExamQuestions.length}</span>
+                          </p>
+                        </div>
+                        <div className="bg-[var(--muted)]/40 p-3 rounded-[var(--radius)] border border-[var(--border)]">
+                          <X size={15} className="text-[var(--muted-foreground)] mb-1" />
+                          <span className="text-[11px] text-[var(--muted-foreground)] font-bold uppercase tracking-[0.04em] block">Fault Ledger</span>
+                          <p className="text-base font-bold text-[var(--error)] font-mono tabular-nums">
+                            {currentExamQuestions.length - score}
+                          </p>
+                        </div>
+                        <div className="bg-[var(--muted)]/40 p-3 rounded-[var(--radius)] border border-[var(--border)]">
+                          <Clock size={15} className="text-[var(--muted-foreground)] mb-1" />
+                          <span className="text-[11px] text-[var(--muted-foreground)] font-bold uppercase tracking-[0.04em] block">Duration Expended</span>
+                          <p className="text-base font-bold text-[var(--foreground)] font-mono tabular-nums">
+                            {calculateRemainingSecondsTime(totalTimeTaken)}
+                          </p>
+                        </div>
+                      </div>
 
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 text-left">
-                      <div className="bg-white/5 p-4 rounded-xl border border-white/10 relative overflow-hidden">
-                        <BarChart3 size={16} className="text-white/40 mb-2" />
-                        <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest block mb-1">Grade Accuracy</span>
-                        <p className="text-lg sm:text-xl font-mono font-bold text-white leading-none">
-                          {(animatedScore / currentExamQuestions.length * 100).toFixed(1)}%
+                      {/* Proctor Report */}
+                      <div className="bg-[var(--muted)]/30 border border-[var(--border)] p-4 rounded-[var(--radius)] text-left space-y-2">
+                        <h3 className="text-xs font-bold uppercase tracking-[0.04em] text-[var(--foreground)] flex items-center gap-1.5">
+                          <Cpu size={14} className="text-[var(--primary)]" /> Proctor Intelligence Report
+                        </h3>
+                        <p className="text-xs text-[var(--foreground)] leading-relaxed">
+                          {customAIProcText}
                         </p>
-                      </div>
-                      <div className="bg-white/5 p-4 rounded-xl border border-white/10 relative overflow-hidden">
-                        <Target size={16} className="text-white/40 mb-2" />
-                        <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest block mb-1">Correct Nodes</span>
-                        <p className="text-lg sm:text-xl font-mono font-bold text-emerald-400 leading-none">
-                          {animatedScore} <span className="text-xs text-zinc-500 font-mono">/ {currentExamQuestions.length}</span>
-                        </p>
-                      </div>
-                      <div className="bg-white/5 p-4 rounded-xl border border-white/10 relative overflow-hidden">
-                        <X size={16} className="text-white/40 mb-2" />
-                        <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest block mb-1">Fault Ledger Code</span>
-                        <p className="text-lg sm:text-xl font-mono font-bold text-rose-500 leading-none">
-                          {currentExamQuestions.length - score}
-                        </p>
-                      </div>
-                      <div className="bg-white/5 p-4 rounded-xl border border-white/10 relative overflow-hidden">
-                        <Clock size={16} className="text-white/40 mb-2" />
-                        <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest block mb-1">Duration Expended</span>
-                        <p className="text-lg sm:text-xl font-mono font-bold text-cyan-400 leading-none font-mono">
-                          {calculateRemainingSecondsTime(totalTimeTaken)}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Highly advanced Simulated Proctor logs with evaluation comments */}
-                    <div className="bg-white/5 border border-white/15 p-5 rounded-2xl mb-8 text-left relative overflow-hidden">
-                      <div className="absolute right-3 top-3 w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      <h3 className="text-sm font-bold uppercase tracking-wider text-white mb-2 flex items-center gap-2">
-                        <Cpu size={14} className="text-cyan-400 animate-spin" style={{ animationDuration: '6s' }} /> SECURE AI PROCTOR INTELLIGENCE REPORT
-                      </h3>
-                      <div className="text-xs text-zinc-400 font-mono space-y-2 leading-relaxed">
-                        <p>{customAIProcText}</p>
-                        <div className="border-t border-white/5 pt-2.5 mt-2.5 flex flex-wrap gap-x-6 gap-y-2 text-[10px]">
+                        <div className="border-t border-[var(--border)] pt-2 flex flex-wrap gap-4 text-[11px] text-[var(--muted-foreground)] font-mono">
                           <span>PROCTOR ID: NS-MONITOR-09</span>
-                          <span>WARNING INTERCEPTS: {warnings} / 3</span>
-                          <span>SPEED FACTOR: {(totalTimeTaken / currentExamQuestions.length).toFixed(1)} Secs / Node</span>
+                          <span>WARNINGS: {warnings} / 3</span>
+                          <span>SPEED: {(totalTimeTaken / currentExamQuestions.length).toFixed(1)}s / question</span>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Instagram-style Shareable Result Card inside result dashboard */}
-                    <div className="bg-gradient-to-tr from-[#05091a] to-[#0d1630] border border-white/5 p-5 sm:p-6 rounded-2xl text-center mb-8 max-w-sm mx-auto shadow-2xl relative">
-                      <div className="absolute inset-0 bg-[#00d2ff]/5 opacity-30 blur-2xl" />
-                      <div className="relative z-10 space-y-4">
-                        <span className="bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[9px] font-mono tracking-widest uppercase px-3 py-1 rounded-full inline-block font-bold">
-                          INSTAGRAM STORY GRADE TRANSCRIPT
-                        </span>
-                        
-                        <div className="space-y-1">
-                          <h4 className="text-xl font-black font-mono tracking-tighter text-white">EXAM PORTAL ATTAINMENT</h4>
-                          <p className="text-xs text-zinc-400 font-mono">COURSE: {userData.course}</p>
+                      {/* Candidate info */}
+                      <div className="bg-[var(--muted)]/30 border border-[var(--border)] p-4 rounded-[var(--radius)] text-left grid grid-cols-2 gap-3 text-xs">
+                        <div>
+                          <span className="text-[11px] text-[var(--muted-foreground)] uppercase tracking-[0.04em] block">Candidate Nominee</span>
+                          <p className="font-bold text-[var(--foreground)]">{userData.name}</p>
                         </div>
-
-                        <div className="py-4 bg-white/5 rounded-xl border border-white/5 backdrop-blur-md relative overflow-hidden">
-                          <span className="text-3xl sm:text-4xl font-mono font-black text-[#00d2ff]">
-                            {(score / currentExamQuestions.length * 100).toFixed(1)}% ACCURACY
-                          </span>
-                          <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-mono mt-1">CALIBRATED ON SYSTEM INTERFACES</p>
+                        <div>
+                          <span className="text-[11px] text-[var(--muted-foreground)] uppercase tracking-[0.04em] block">Syllabus Track</span>
+                          <p className="font-bold text-[var(--foreground)]">{userData.course}</p>
                         </div>
-
-                        <p className="text-[10px] text-zinc-400 leading-relaxed font-mono italic">
-                          "I scored {(score / currentExamQuestions.length * 100).toFixed(1)}% on NS TECHNOLOGY AI Exam Portal 🚀"
-                        </p>
-                        
-                        <div className="flex gap-2">
-                          <button 
-                            onClick={handleDownloadResultCard}
-                            className="flex-1 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 text-white font-extrabold text-[10px] uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(6,182,212,0.35)] hover:scale-105 active:scale-95 border border-cyan-400/20"
-                          >
-                            <Download size={12} /> Download Transcript SVG
-                          </button>
+                        <div>
+                          <span className="text-[11px] text-[var(--muted-foreground)] uppercase tracking-[0.04em] block">Attainment ID</span>
+                          <p className="font-mono text-[var(--primary)] font-bold">{certificateId}</p>
+                        </div>
+                        <div>
+                          <span className="text-[11px] text-[var(--muted-foreground)] uppercase tracking-[0.04em] block">Authorized Date</span>
+                          <p className="font-mono text-[var(--foreground)]">{userData.date}</p>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Informative examinee logs */}
-                    <div className="bg-white/5 p-5 border border-white/10 rounded-2xl mb-8 text-left grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
-                      <div>
-                        <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider block mb-0.5">CANDIDATE NOMINEE</span>
-                        <p className="font-extrabold text-white leading-none">{userData.name}</p>
-                      </div>
-                      <div>
-                        <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider block mb-0.5">Syllabus Track</span>
-                        <p className="font-extrabold text-white leading-none">{userData.course}</p>
-                      </div>
-                      <div>
-                        <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider block mb-0.5">Certified Attainment ID</span>
-                        <p className="font-mono text-cyan-400 font-bold leading-none">{certificateId}</p>
-                      </div>
-                      <div>
-                        <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider block mb-0.5">Authorized stamp Date</span>
-                        <p className="font-mono text-zinc-300 font-semibold leading-none">{userData.date}</p>
-                      </div>
-                    </div>
-
-                    {/* Result Actions block */}
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                      <button 
-                        onClick={() => {
-                          synthSvc.playSwell();
-                          setRandomizedQuestionsList([]);
-                          setExamStep('gate');
-                        }}
-                        className="px-6 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-xs uppercase tracking-wider font-extrabold text-zinc-400 hover:text-white transition-all cursor-pointer flex items-center justify-center gap-2"
-                      >
-                        <RefreshCw size={14} /> Recalibrate Assessment
-                      </button>
-                      <button 
-                        onClick={() => {
-                          synthSvc.playClick();
-                          setIsReviewMode(!isReviewMode);
-                        }}
-                        className={`px-6 py-2.5 rounded-xl border text-xs uppercase tracking-wider font-extrabold transition-all cursor-pointer flex items-center justify-center gap-2
-                          ${isReviewMode ? 'bg-[#101e38] border-cyan-500/30 text-cyan-440 shadow-[0_0_10px_rgba(6,182,212,0.15)]' : 'border-white/10 text-zinc-300 hover:text-white hover:bg-white/5'}`}
-                      >
-                        <Eye size={14} /> {isReviewMode ? 'Collapse Detailed Ledger' : 'Audit Response Vectors'}
-                      </button>
-                      
-                      {isSufficientlyPassed && (
+                      {/* Action buttons */}
+                      <div className="flex flex-col sm:flex-row gap-2.5 justify-center">
                         <button 
                           onClick={() => {
                             synthSvc.playSwell();
-                            setExamStep('certificate');
+                            setRandomizedQuestionsList([]);
+                            setExamStep('gate');
                           }}
-                          className={`${themeDetails.accentBg} px-6 py-2.5 rounded-xl text-black font-black text-xs uppercase tracking-wider shadow-lg transition-all hover:scale-105 active:scale-95 cursor-pointer flex items-center justify-center gap-2`}
-                          id="proceed-view-certificate-btn"
+                          className="btn-secondary py-2 px-3 text-xs cursor-pointer min-h-[44px]"
                         >
-                          <Award size={14} /> Dispatch Certificate
+                          <RefreshCw size={14} /> Recalibrate Assessment
                         </button>
-                      )}
-                    </div>
-
-                    {/* Expanded Response vector audit matrix */}
-                    <AnimatePresence>
-                      {isReviewMode && (
-                        <motion.div 
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="mt-8 pt-8 border-t border-white/5 space-y-4 text-left overflow-hidden"
+                        <button 
+                          onClick={() => {
+                            synthSvc.playClick();
+                            setIsReviewMode(!isReviewMode);
+                          }}
+                          className={`py-2 px-3 rounded-[var(--radius)] border text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5 min-h-[44px]
+                            ${isReviewMode ? 'bg-[var(--primary)] border-[var(--primary)] text-[var(--primary-foreground)]' : 'border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--muted)]'}`}
                         >
-                          <h3 className="text-sm font-black font-mono tracking-wider uppercase text-cyan-400 mb-2">INTELLIGENT RESPONSE COMPARISON AUDIT</h3>
-                          {currentExamQuestions.map((q, idx) => (
-                            <div key={idx} className={`p-4 rounded-xl border relative overflow-hidden 
-                              ${answers[idx] === q.answer ? 'bg-[#061e1b] border-emerald-500/20' : 'bg-[#1a0c10] border-rose-500/20'}`}
-                            >
-                              <div className="absolute top-2 right-2 font-mono text-[9px] uppercase tracking-wider opacity-30">
-                                {answers[idx] === q.answer ? 'MATCH' : 'MISMATCH'}
-                              </div>
-                              <p className="font-extrabold text-[#ffffffeb] text-sm mb-3 flex gap-2">
-                                <span className="font-mono text-xs opacity-50">#{(idx + 1).toString().padStart(2, '0')}.</span>
-                                <span>{q.question}</span>
-                              </p>
-                              
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                                <div className={`p-2.5 rounded-lg flex items-center gap-2 font-mono ${answers[idx] === q.answer ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
-                                  {answers[idx] === q.answer ? <Check size={14} /> : <X size={14} />}
-                                  <span>Allocated: {answers[idx] || 'NULL EXECUTED'}</span>
-                                </div>
-                                {answers[idx] !== q.answer && (
-                                  <div className="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-400 font-mono flex items-center gap-2">
-                                    <Check size={14} /> Correct Target: {q.answer}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </div>
-              )
-            )}
+                          <Eye size={14} /> {isReviewMode ? 'Collapse Detailed Ledger' : 'Audit Response Vectors'}
+                        </button>
+                        
+                        {isSufficientlyPassed && (
+                          <button 
+                            onClick={() => {
+                              synthSvc.playSwell();
+                              setExamStep('certificate');
+                            }}
+                            className="btn-primary py-2 px-4 text-xs cursor-pointer min-h-[44px]"
+                            id="proceed-view-certificate-btn"
+                          >
+                            <Award size={14} /> Dispatch Certificate
+                          </button>
+                        )}
 
-              {/* Exam Step: PRINT-READY ATTAINMENT CERTIFICATE */}
+                        <button 
+                          onClick={handleDownloadResultCard}
+                          className="btn-secondary py-2 px-3 text-xs cursor-pointer min-h-[44px]"
+                        >
+                          <Download size={14} /> Export SVG
+                        </button>
+                      </div>
+
+                      {/* Expanded Question Review */}
+                      <AnimatePresence>
+                        {isReviewMode && (
+                          <motion.div 
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.12 }}
+                            className="mt-6 pt-6 border-t border-[var(--border)] space-y-3 text-left overflow-hidden"
+                          >
+                            <h3 className="text-xs font-bold uppercase tracking-[0.04em] text-[var(--foreground)] mb-2">
+                              Intelligent Response Comparison Audit
+                            </h3>
+                            {currentExamQuestions.map((q, idx) => (
+                              <div key={idx} className={`p-3.5 rounded-[var(--radius)] border 
+                                ${answers[idx] === q.answer ? 'bg-[var(--card)] border-[var(--primary)]' : 'bg-[var(--card)] border-[var(--error)]'}`}
+                              >
+                                <p className="font-bold text-[var(--foreground)] text-xs mb-2 flex gap-1.5">
+                                  <span className="font-mono text-[var(--muted-foreground)]">#{(idx + 1).toString().padStart(2, '0')}.</span>
+                                  <span>{q.question}</span>
+                                </p>
+                                
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                  <div className={`p-2 rounded-[var(--radius)] flex items-center gap-1.5 ${answers[idx] === q.answer ? 'text-[var(--primary)] bg-[var(--muted)]' : 'text-[var(--error)] bg-[var(--error)]/10'}`}>
+                                    {answers[idx] === q.answer ? <Check size={13} /> : <X size={13} />}
+                                    <span>Allocated: {answers[idx] || 'Unanswered'}</span>
+                                  </div>
+                                  {answers[idx] !== q.answer && (
+                                    <div className="p-2 rounded-[var(--radius)] bg-[var(--muted)] text-[var(--primary)] flex items-center gap-1.5">
+                                      <Check size={13} /> Correct Target: {q.answer}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </div>
+                )
+              )}
+
+              {/* Step: Printable Certificate (Classic Double Border) */}
               {examStep === 'certificate' && (
                 <motion.div 
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="max-w-5xl w-full mx-auto px-1 sm:px-4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.12 }}
+                  className="max-w-2xl w-full mx-auto"
                 >
-                  {/* Real printable container card */}
-                  <div id="certificate-container" className="bg-white text-slate-900 shadow-2xl rounded relative border-[12px] border-double border-slate-300 p-6 sm:p-14 md:p-16 text-center">
-                    {/* Inner detailed micro bounding border */}
-                    <div className="absolute inset-4 border border-slate-200 pointer-events-none" />
-                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
-                         style={{ backgroundImage: 'radial-gradient(#002d72 1.5px, transparent 1.5px)', backgroundSize: '16px 16px' }} />
-
-                    <div className="relative z-10 border border-slate-100 p-8 flex flex-col items-center">
-                      <div className="flex justify-center mb-4">
-                        <div className="w-14 h-14 bg-slate-900 text-white rounded-full flex items-center justify-center shadow-lg">
-                          <Trophy size={24} />
-                        </div>
+                  <div id="certificate-container" className="bg-[var(--card)] text-[var(--foreground)] rounded-[var(--radius)] border-4 border-double border-[var(--border)] p-8 sm:p-12 text-center shadow-sm">
+                    <div className="flex justify-center mb-3">
+                      <div className="w-12 h-12 bg-[var(--primary)] text-[var(--primary-foreground)] rounded-full flex items-center justify-center">
+                        <Trophy size={20} />
                       </div>
+                    </div>
 
-                      <h1 className="text-2xl sm:text-4xl md:text-5xl font-serif font-black tracking-tight text-slate-800 uppercase mb-1">
-                        Certificate of Achievement
-                      </h1>
-                      <div className="h-0.5 w-24 bg-slate-400 mx-auto mb-4" />
-                      <p className="text-[9px] sm:text-[10px] font-sans font-black tracking-[0.3em] text-slate-400 uppercase">
-                        NS TECHNOLOGY ACADEMICS COGNITIVE VERIFICATION
-                      </p>
+                    <h1 className="text-xl sm:text-2xl font-bold tracking-tight uppercase mb-1">
+                      Certificate of Achievement
+                    </h1>
+                    <div className="h-0.5 w-16 bg-[var(--primary)] mx-auto mb-3" />
+                    <p className="text-[11px] font-bold tracking-[0.05em] text-[var(--muted-foreground)] uppercase">
+                      NS Technology Academics Verification
+                    </p>
 
-                      <div className="space-y-4 my-8 max-w-2xl text-slate-600">
-                        <p className="text-sm font-serif italic text-slate-500">This is to certify that candidate nominee</p>
-                        <h2 className="text-2xl sm:text-4xl md:text-5xl font-serif font-bold text-slate-800 tracking-tight underline underline-offset-8 decoration-slate-300">
-                          {userData.name}
-                        </h2>
-                        <p className="text-sm font-serif italic text-slate-500">has successfully completed all computational examinations as validated inside portal nodes for</p>
-                        <h3 className="text-lg sm:text-xl md:text-2xl font-bold uppercase tracking-wide text-slate-900 font-sans">
-                          {userData.course}
-                        </h3>
+                    <div className="space-y-3 my-6">
+                      <p className="text-xs italic text-[var(--muted-foreground)]">This is to certify that candidate nominee</p>
+                      <h2 className="text-2xl sm:text-3xl font-bold underline underline-offset-4 decoration-[var(--border)]">
+                        {userData.name}
+                      </h2>
+                      <p className="text-xs italic text-[var(--muted-foreground)]">has successfully completed computational examinations inside portal nodes for</p>
+                      <h3 className="text-base sm:text-lg font-bold text-[var(--primary)]">
+                        {userData.course}
+                      </h3>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 my-6 text-center text-xs max-w-sm mx-auto">
+                      <div>
+                        <span className="text-[11px] text-[var(--muted-foreground)] font-bold uppercase block">Credential ID</span>
+                        <span className="font-mono font-bold">{certificateId}</span>
                       </div>
-
-                      <div className="grid grid-cols-2 gap-4 my-8 text-center text-xs w-full max-w-md">
-                        <div className="flex flex-col">
-                          <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wide mb-0.5">Verification credential</span>
-                          <span className="font-mono font-bold text-slate-700">{certificateId}</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wide mb-0.5">Accuracy achieved</span>
-                          <span className="font-mono font-bold text-slate-700">{percentageGradeRatio.toFixed(1)}% Passing grade</span>
-                        </div>
+                      <div>
+                        <span className="text-[11px] text-[var(--muted-foreground)] font-bold uppercase block">Accuracy Achieved</span>
+                        <span className="font-mono font-bold">{percentageGradeRatio.toFixed(1)}%</span>
                       </div>
+                    </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 w-full items-end mt-4 mb-4">
-                        <div className="flex flex-col items-center sm:items-start text-xs text-slate-400">
-                          <div className="w-full sm:w-40 border-b border-slate-300 italic text-slate-500 mb-1">NS Technology</div>
-                          <span className="text-[8px] font-bold uppercase tracking-wide">Academics Board Signature</span>
-                        </div>
-
-                        <div className="flex justify-center py-2 sm:py-0">
-                          <div className="relative">
-                            <div className="w-16 h-16 border border-slate-200 rounded-full flex items-center justify-center bg-slate-50">
-                              <Award size={24} className="text-slate-300" />
-                            </div>
-                            <div className="absolute inset-0 border border-dashed border-yellow-600/20 rounded-full animate-spin" style={{ animationDuration: '20s' }} />
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col items-center sm:items-end text-xs text-slate-400">
-                          <div className="w-full sm:w-40 border-b border-slate-300 mb-1 text-slate-700 font-mono text-center sm:text-right">{userData.date}</div>
-                          <span className="text-[8px] font-bold uppercase tracking-wide">Date of Attainment</span>
-                        </div>
+                    <div className="grid grid-cols-2 gap-6 w-full items-end mt-6 pt-6 border-t border-[var(--border)] text-xs text-[var(--muted-foreground)]">
+                      <div className="text-left">
+                        <div className="font-bold text-[var(--foreground)]">NS Technology</div>
+                        <span className="text-[10px] uppercase">Board of Assessment</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-mono font-bold text-[var(--foreground)]">{userData.date}</div>
+                        <span className="text-[10px] uppercase">Date Issued</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4 no-print select-none">
+                  <div className="mt-6 flex flex-col sm:flex-row justify-center gap-3 no-print">
                     <button 
                       onClick={() => {
                         synthSvc.playClick();
                         setExamStep('result');
                       }}
-                      className="px-6 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition-all cursor-pointer flex items-center justify-center gap-2"
+                      className="btn-secondary py-2.5 px-4 text-xs cursor-pointer min-h-[44px]"
                     >
                       <ChevronLeft size={14} /> Return to Metrics
                     </button>
                     <button 
                       onClick={() => window.print()}
-                      className={`px-8 py-2.5 rounded-xl bg-gradient-to-r ${themeDetails.accentBg} text-black font-black text-xs uppercase tracking-wider shadow-lg transition-all hover:scale-105 active:scale-95 cursor-pointer flex items-center justify-center gap-2`}
+                      className="btn-primary py-2.5 px-5 text-xs cursor-pointer min-h-[44px]"
                     >
                       <Download size={14} /> Download Certificate (Print/PDF)
                     </button>
@@ -2080,53 +1531,55 @@ export default function App() {
           )}
 
           {/* ====================================================
-              3. FAQ SECTION WITH SMOOTH SEARCH COLLAPSE
+              3. FAQ SECTION
               ==================================================== */}
           {activeTab === 'faq' && (
             <motion.div 
               key="faq-screen"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -30 }}
-              transition={{ duration: 0.4 }}
-              className="max-w-3xl w-full text-left space-y-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.12 }}
+              className="max-w-2xl w-full text-left space-y-6"
               id="faq-accordion-portal"
             >
-              <div className="text-center space-y-2">
-                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight uppercase text-white">FREQUENTLY ASKED INTEGRITY LOGS</h2>
-                <p className="text-xs text-zinc-400 uppercase font-mono tracking-wider">Expand accordion matrices below for operational clarity</p>
+              <div className="text-center space-y-1">
+                <h2 className="text-[clamp(1.1rem,3vw,1.4rem)] font-bold text-[var(--foreground)]">
+                  Frequently Asked Questions
+                </h2>
+                <p className="text-xs text-[var(--muted-foreground)]">Common questions and operational guidance</p>
               </div>
 
-              {/* FAQ Search Bar input */}
-              <div className="relative max-w-md mx-auto">
+              {/* FAQ Search Bar */}
+              <div className="relative">
                 <input 
                   type="text"
                   placeholder="Query system rule details..."
                   value={faqCriteria}
                   onChange={(e) => setFaqCriteria(e.target.value)}
-                  className="input-field w-full text-xs pl-10 pr-4 py-3 placeholder:text-zinc-500 bg-[#090f1d] border border-white/5 shadow-2xl"
+                  className="crimson-input w-full pl-9 pr-4 py-2.5 text-xs placeholder:text-[var(--muted-foreground)]"
                   id="faq-search-criteria"
                 />
-                <Search size={14} className="text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Search size={14} className="text-[var(--muted-foreground)] absolute left-3 top-1/2 -translate-y-1/2" />
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {filteredFaqList.length > 0 ? (
                   filteredFaqList.map((item, idx) => (
                     <div 
                       key={idx}
-                      className="glass-card border border-white/5 overflow-hidden transition-all duration-300"
+                      className="crimson-card overflow-hidden transition-colors"
                     >
                       <button 
                         onClick={() => handleToggleFaqIndex(idx)}
-                        className="w-full p-5 text-left flex justify-between items-center gap-4 transition-colors hover:bg-white/[0.02] cursor-pointer"
+                        className="w-full p-4 text-left flex justify-between items-center gap-4 hover:bg-[var(--muted)]/40 transition-colors cursor-pointer min-h-[44px]"
                       >
-                        <h3 className="font-extrabold uppercase text-xs sm:text-sm tracking-wide text-white/95">
+                        <h3 className="font-bold text-xs sm:text-sm text-[var(--foreground)]">
                           {item.q}
                         </h3>
                         <ChevronDown 
-                          size={16} 
-                          className={`text-zinc-400 transition-transform duration-300 ${openedFaqIndices[idx] ? 'rotate-180 text-cyan-400' : ''}`} 
+                          size={15} 
+                          className={`text-[var(--muted-foreground)] transition-transform duration-150 shrink-0 ${openedFaqIndices[idx] ? 'rotate-180 text-[var(--primary)]' : ''}`} 
                         />
                       </button>
 
@@ -2136,10 +1589,10 @@ export default function App() {
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.25 }}
-                            className="overflow-hidden border-t border-white/5"
+                            transition={{ duration: 0.12 }}
+                            className="overflow-hidden border-t border-[var(--border)]"
                           >
-                            <div className="p-5 text-xs sm:text-sm text-zinc-400 leading-relaxed font-sans bg-[#050a14]">
+                            <div className="p-4 text-xs sm:text-[14px] text-[var(--foreground)] leading-relaxed bg-[var(--muted)]/20">
                               {item.a}
                             </div>
                           </motion.div>
@@ -2148,81 +1601,62 @@ export default function App() {
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-12 text-zinc-500 text-xs uppercase tracking-wider font-mono">
-                    Zero matched security query lines detected.
+                  <div className="text-center py-8 text-[var(--muted-foreground)] text-xs">
+                    No matching questions found.
                   </div>
                 )}
               </div>
 
-              {/* ====================================================
-                  PREMIUM ABOUT DEVELOPER (SURAJ RAWAT) - INSIDE FAQ
-                  ==================================================== */}
-              <div className="pt-12 border-t border-white/5 space-y-6">
+              {/* Developer Profile (Suraj Rawat) */}
+              <div className="pt-8 border-t border-[var(--border)] space-y-4">
                 <div className="text-center">
-                  <span className="bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[10px] font-mono tracking-widest uppercase px-3 py-1 rounded-full col-span-full">
-                    MEET THE ARCHITECT
+                  <span className="text-[12px] font-bold text-[var(--primary)] uppercase tracking-[0.04em]">
+                    Developer Profile
                   </span>
-                  <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white mt-1 uppercase">DEVELOPER PROFILE</h2>
+                  <h2 className="text-base sm:text-lg font-bold text-[var(--foreground)] mt-0.5">Meet the Creator</h2>
                 </div>
 
-                <motion.div 
-                  whileHover={{ scale: 1.01 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                  className="glass-card max-w-2xl w-full mx-auto p-8 sm:p-12 border border-cyan-500/15 relative overflow-hidden glow-border text-center shadow-[0_0_50px_rgba(6,182,212,0.05)]"
-                >
-                  {/* Absolute Glowing Halos */}
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-cyan-500/10 to-transparent blur-[80px]" />
-                  <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-purple-500/10 to-transparent blur-[80px]" />
-                  
-                  {/* Decorative corners */}
-                  <div className="absolute top-0 left-0 w-8 h-8 border-t border-l border-cyan-500/30 rounded-tl-xl" />
-                  <div className="absolute bottom-0 right-0 w-8 h-8 border-b border-r border-purple-500/30 rounded-br-xl" />
-
-                  <div className="space-y-6 relative z-10">
-                    <div className="space-y-3">
-                      <span className="bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px] font-mono tracking-widest uppercase px-3.5 py-1 rounded-full inline-block">
-                        FULL STACK DEVELOPER
-                      </span>
-                      <h3 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white uppercase font-sans">
-                        Suraj Rawat
-                      </h3>
-                      <p className="text-xs text-purple-400 font-mono uppercase tracking-wider">
-                        BCA Student | Graphic Era Hill University, Haldwani
-                      </p>
-                    </div>
-
-                    <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-xl mx-auto font-serif">
-                      Passionate about building modern responsive web applications with clean UI, smooth user experiences, and futuristic frontend design.
+                <div className="crimson-card p-6 sm:p-8 text-center space-y-4">
+                  <div className="space-y-1">
+                    <h3 className="text-lg sm:text-xl font-bold text-[var(--foreground)]">
+                      Suraj Rawat
+                    </h3>
+                    <p className="text-xs text-[var(--primary)] font-bold">
+                      BCA Student | Graphic Era Hill University, Haldwani
                     </p>
-
-                    <div className="flex flex-wrap justify-center gap-4 pt-2">
-                      <a 
-                        href="https://github.com/SurajRawatr07" 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="flex items-center gap-2 text-xs text-zinc-300 hover:text-white bg-white/5 border border-white/10 px-4 py-2.5 rounded-xl transition-all duration-200 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:-translate-y-0.5 cursor-pointer"
-                      >
-                        <Github size={14} className="text-white" /> GitHub <ExternalLink size={10} className="opacity-40" />
-                      </a>
-                      <a 
-                        href="https://www.linkedin.com/in/suraj-rawat-30513b340" 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="flex items-center gap-2 text-xs text-zinc-300 hover:text-white bg-white/5 border border-white/10 px-4 py-2.5 rounded-xl transition-all duration-200 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:-translate-y-0.5 cursor-pointer"
-                      >
-                        <Linkedin size={14} className="text-cyan-400" /> LinkedIn <ExternalLink size={10} className="opacity-40" />
-                      </a>
-                      <a 
-                        href="https://instagram.com/surajrawat07" 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="flex items-center gap-2 text-xs text-zinc-300 hover:text-white bg-white/5 border border-white/10 px-4 py-2.5 rounded-xl transition-all duration-200 hover:border-purple-400 hover:shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:-translate-y-0.5 cursor-pointer"
-                      >
-                        <Instagram size={14} className="text-pink-400" /> Instagram <ExternalLink size={10} className="opacity-40" />
-                      </a>
-                    </div>
                   </div>
-                </motion.div>
+
+                  <p className="text-xs sm:text-[14px] text-[var(--foreground)] leading-relaxed max-w-lg mx-auto">
+                    Passionate about building modern responsive web applications with clean UI, smooth user experiences, and futuristic frontend design.
+                  </p>
+
+                  <div className="flex flex-wrap justify-center gap-2 pt-1">
+                    <a 
+                      href="https://github.com/SurajRawatr07" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="btn-secondary text-xs px-3.5 py-1.5 min-h-[44px]"
+                    >
+                      <Github size={14} /> GitHub <ExternalLink size={10} className="opacity-50" />
+                    </a>
+                    <a 
+                      href="https://www.linkedin.com/in/suraj-rawat-30513b340" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="btn-secondary text-xs px-3.5 py-1.5 min-h-[44px]"
+                    >
+                      <Linkedin size={14} className="text-[var(--primary)]" /> LinkedIn <ExternalLink size={10} className="opacity-50" />
+                    </a>
+                    <a 
+                      href="https://instagram.com/surajrawat07" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="btn-secondary text-xs px-3.5 py-1.5 min-h-[44px]"
+                    >
+                      <Instagram size={14} className="text-[var(--primary)]" /> Instagram <ExternalLink size={10} className="opacity-50" />
+                    </a>
+                  </div>
+                </div>
               </div>
             </motion.div>
           )}
@@ -2230,108 +1664,104 @@ export default function App() {
       </main>
 
       {/* ====================================================
-          4. FLOATING MOBILE-APP STYLE GLASS NAVIGATION
+          4. APP-LIKE FIXED BOTTOM TAB BAR (3 ITEMS)
+          - Home, Exam, FAQ
+          - Background --card, top border --border
+          - Active tab has --primary icon & label and thin top indicator line
+          - Compact centered bar on desktop
           ==================================================== */}
-      <div 
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[92%] max-w-sm no-print"
+      <nav 
+        className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--card)] border-t border-[var(--border)] pb-safe md:max-w-md md:mx-auto md:bottom-4 md:rounded-[var(--radius)] md:border md:shadow-sm no-print"
+        aria-label="Bottom Navigation"
       >
-        <div className="bg-[#040812f2] border border-white/10 backdrop-blur-2xl rounded-full px-2.5 py-2 flex justify-between items-center shadow-[0_4px_30px_rgba(0,0,0,0.8),0_0_20px_rgba(6,182,212,0.1)] relative">
-          
-          {/* Active bottom slider background pill */}
-          <div 
-            className="absolute h-[80%] rounded-full bg-gradient-to-r from-cyan-500/15 to-purple-600/15 border border-cyan-400/20 transition-all duration-300 shadow-[0_0_15px_rgba(6,182,212,0.15)] pointer-events-none"
-            style={{
-              width: '30%',
-              left: activeTab === 'home' ? '2.5%' : activeTab === 'exam' ? '35%' : '67.5%'
-            }}
-          />
-
+        <div className="flex items-center justify-around h-15 sm:h-16 px-1">
+          {/* Tab 1: Home */}
           <button 
             onClick={() => {
               synthSvc.playClick();
               setActiveTab('home');
             }}
-            className={`w-[30%] py-1.5 text-center rounded-full font-mono text-[10px] font-bold uppercase tracking-wider transition-all duration-200 flex flex-col items-center gap-1 cursor-pointer relative z-10 hover:scale-105 active:scale-95
-              ${activeTab === 'home' ? 'text-cyan-400 font-black' : 'text-zinc-400 hover:text-white'}`}
+            className={`flex-1 flex flex-col items-center justify-center py-1 min-h-[44px] min-w-[44px] transition-transform active:scale-95 cursor-pointer relative h-full
+              ${activeTab === 'home' ? 'text-[var(--primary)]' : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]'}`}
             id="nav-tab-home-btn"
           >
-            <Home 
-              size={16} 
-              className={`${activeTab === 'home' ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.85)] animate-bounce' : 'text-zinc-400 opacity-70'}`}
-            />
-            <span>HOME</span>
+            {activeTab === 'home' && (
+              <span className="absolute top-0 inset-x-3 h-[2px] bg-[var(--primary)]" />
+            )}
+            <Home size={18} className="mb-0.5" />
+            <span className="text-[11px] font-bold tracking-[0.02em]">Home</span>
           </button>
 
+          {/* Tab 2: Exam */}
           <button 
             onClick={() => {
               synthSvc.playClick();
               setActiveTab('exam');
             }}
-            className={`w-[30%] py-1.5 text-center rounded-full font-mono text-[10px] font-bold uppercase tracking-wider transition-all duration-200 flex flex-col items-center gap-1 cursor-pointer relative z-10 hover:scale-105 active:scale-95
-              ${activeTab === 'exam' ? 'text-purple-400 font-black' : 'text-zinc-400 hover:text-white'}`}
+            className={`flex-1 flex flex-col items-center justify-center py-1 min-h-[44px] min-w-[44px] transition-transform active:scale-95 cursor-pointer relative h-full
+              ${activeTab === 'exam' ? 'text-[var(--primary)]' : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]'}`}
             id="nav-tab-exam-btn"
           >
-            <ShieldCheck size={15} className={`${activeTab === 'exam' ? 'animate-bounce text-purple-400' : 'text-zinc-400'}`} />
-            <span>EXAM</span>
+            {activeTab === 'exam' && (
+              <span className="absolute top-0 inset-x-3 h-[2px] bg-[var(--primary)]" />
+            )}
+            <ShieldCheck size={18} className="mb-0.5" />
+            <span className="text-[11px] font-bold tracking-[0.02em]">Exam</span>
           </button>
 
+          {/* Tab 3: FAQ */}
           <button 
             onClick={() => {
               synthSvc.playClick();
               setActiveTab('faq');
             }}
-            className={`w-[30%] py-1.5 text-center rounded-full font-mono text-[10px] font-bold uppercase tracking-wider transition-all duration-200 flex flex-col items-center gap-1 cursor-pointer relative z-10 hover:scale-105 active:scale-95
-              ${activeTab === 'faq' ? 'text-cyan-400 font-black' : 'text-zinc-400 hover:text-white'}`}
+            className={`flex-1 flex flex-col items-center justify-center py-1 min-h-[44px] min-w-[44px] transition-transform active:scale-95 cursor-pointer relative h-full
+              ${activeTab === 'faq' ? 'text-[var(--primary)]' : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]'}`}
             id="nav-tab-faq-btn"
           >
-            <MessageSquare size={15} className={`${activeTab === 'faq' ? 'animate-bounce text-cyan-400' : 'text-zinc-400'}`} />
-            <span>FAQ</span>
+            {activeTab === 'faq' && (
+              <span className="absolute top-0 inset-x-3 h-[2px] bg-[var(--primary)]" />
+            )}
+            <MessageSquare size={18} className="mb-0.5" />
+            <span className="text-[11px] font-bold tracking-[0.02em]">FAQ</span>
           </button>
         </div>
-      </div>
+      </nav>
 
-      {/* Modal: Secure Rules Dialog */}
+      {/* Modal: Rules / Help */}
       <AnimatePresence>
         {showHelpModal && (
-          <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-black/50">
             <motion.div 
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 15 }}
-              className="glass-card p-6 sm:p-8 max-w-md w-full border border-cyan-500/30 text-left glow-border shadow-2xl relative"
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.12 }}
+              className="bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] p-6 max-w-md w-full text-left shadow-lg"
             >
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-black uppercase text-white flex items-center gap-2">
-                  <ShieldCheck size={20} className="text-cyan-400" /> SECURE CONSTRAINTS
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-sm font-bold uppercase text-[var(--foreground)] flex items-center gap-1.5">
+                  <ShieldCheck size={18} className="text-[var(--primary)]" /> Secure Constraints
                 </h3>
                 <button 
                   onClick={() => setShowHelpModal(false)}
-                  className="p-1.5 hover:bg-white/5 rounded-lg text-zinc-400 hover:text-white cursor-pointer"
+                  className="p-1 text-[var(--muted-foreground)] hover:text-[var(--foreground)] rounded"
                 >
-                  <X size={18} />
+                  <X size={16} />
                 </button>
               </div>
 
-              <div className="space-y-4 text-xs font-mono text-zinc-400 leading-relaxed">
-                <div className="p-3 bg-[#08101e] border border-cyan-500/10 rounded-xl space-y-1">
-                  <p className="text-cyan-400 font-bold uppercase mb-1">Passcodes Keys:</p>
-                  <p>• Basic Computer: <span className="font-bold text-white selection:bg-purple-500/30">NSTECHBASIC</span></p>
-                  <p>• Tally ERP: <span className="font-bold text-white selection:bg-purple-500/30">NSTECHTALLY</span></p>
-                  <p>• Web Designing: <span className="font-bold text-white selection:bg-purple-500/30">NSTECHWEB</span></p>
+              <div className="space-y-3 text-xs text-[var(--foreground)] leading-relaxed">
+                <div className="p-3 bg-[var(--muted)]/50 border border-[var(--border)] rounded-[var(--radius)] space-y-1 font-mono text-[11px]">
+                  <p className="text-[var(--primary)] font-bold uppercase">Passcodes:</p>
+                  <p>• Basic Computer: <span className="font-bold">NSTECHBASIC</span></p>
+                  <p>• Tally ERP: <span className="font-bold">NSTECHTALLY</span></p>
+                  <p>• Web Designing: <span className="font-bold">NSTECHWEB</span></p>
                 </div>
 
-                <div className="flex gap-3">
-                  <div className="w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center font-mono text-cyan-400 text-[10px] flex-shrink-0 font-bold">1</div>
-                  <p>Input candidate Full Name for certificate credentialing.</p>
-                </div>
-                <div className="flex gap-3">
-                  <div className="w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center font-mono text-cyan-400 text-[10px] flex-shrink-0 font-bold">2</div>
-                  <p>Choose expertise course track and inject matching passcode verification key.</p>
-                </div>
-                <div className="flex gap-3">
-                  <div className="w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center font-mono text-cyan-400 text-[10px] flex-shrink-0 font-bold">3</div>
-                  <p>The system monitors active browser visibility bounds. Tab switching triggers alerts and eventually auto-submits score vectors.</p>
-                </div>
+                <p>1. Input candidate Full Name for certificate credentialing.</p>
+                <p>2. Choose expertise course track and inject matching passcode verification key.</p>
+                <p>3. The system monitors active browser visibility bounds. Tab switching triggers alerts and eventually auto-submits score vectors.</p>
               </div>
 
               <button 
@@ -2339,45 +1769,44 @@ export default function App() {
                   synthSvc.playClick();
                   setShowHelpModal(false);
                 }}
-                className="w-full mt-6 py-2.5 rounded-xl bg-cyan-500 text-black font-extrabold text-xs uppercase tracking-wider transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+                className="btn-primary w-full mt-4 py-2 text-xs min-h-[44px]"
               >
-                Accept Guardianship Parameters
+                Accept Parameters
               </button>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
-      {/* Modal: Anti-cheat Violation Alert Screen */}
+      {/* Modal: Anti-cheat Violation Alert */}
       <AnimatePresence>
         {showViolationModal && (
-          <div className="fixed inset-0 z-[140] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md">
+          <div className="fixed inset-0 z-[140] flex items-center justify-center p-4 bg-black/60">
             <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="glass-card p-6 sm:p-8 max-w-md w-full border border-rose-500/40 text-center glow-border shadow-[0_0_50px_rgba(239,68,68,0.3)] relative"
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.12 }}
+              className="bg-[var(--card)] border border-[var(--error)] rounded-[var(--radius)] p-6 max-w-sm w-full text-center shadow-lg"
             >
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-rose-500 to-transparent animate-pulse" />
-              
-              <div className="w-16 h-16 bg-rose-500/10 text-rose-400 rounded-full flex items-center justify-center mx-auto mb-5 border border-rose-500/30 shadow-[0_0_20px_rgba(239,68,68,0.2)]">
-                <ShieldAlert size={32} className="animate-bounce" />
+              <div className="w-12 h-12 bg-[var(--error)]/10 text-[var(--error)] rounded-full flex items-center justify-center mx-auto mb-3">
+                <ShieldAlert size={26} />
               </div>
               
-              <h3 className="text-xl font-black uppercase text-white tracking-tight mb-2">
+              <h3 className="text-base font-bold text-[var(--foreground)] mb-1">
                 Window Violation Detected
               </h3>
               
-              <p className="text-sm text-zinc-300 leading-relaxed mb-6 font-sans">
+              <p className="text-xs text-[var(--muted-foreground)] leading-relaxed mb-4">
                 Your activity has been flagged. Switching windows is strictly prohibited and recorded.
               </p>
 
-              <div className="bg-rose-500/5 border border-rose-500/20 rounded-xl p-4 mb-6">
-                <p className="text-xs font-mono text-zinc-400 uppercase tracking-widest">Active Violation Count</p>
-                <p className="text-3xl font-mono font-black text-rose-500 mt-1">
-                  {warnings} <span className="text-zinc-500 text-lg">/ 3</span>
+              <div className="bg-[var(--error)]/10 border border-[var(--error)]/30 rounded-[var(--radius)] p-3 mb-4">
+                <p className="text-[11px] text-[var(--muted-foreground)] uppercase tracking-[0.04em]">Active Violation Count</p>
+                <p className="text-2xl font-mono font-bold text-[var(--error)] mt-0.5">
+                  {warnings} <span className="text-[var(--muted-foreground)] text-sm">/ 3</span>
                 </p>
-                <p className="text-[10px] text-zinc-500 font-mono mt-1 uppercase">Instant auto-submission occurs on the 3rd infraction.</p>
+                <p className="text-[10px] text-[var(--muted-foreground)] mt-1">Instant auto-submission occurs on the 3rd infraction.</p>
               </div>
 
               <button 
@@ -2385,34 +1814,37 @@ export default function App() {
                   synthSvc.playClick();
                   setShowViolationModal(false);
                 }}
-                className="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs uppercase tracking-widest transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer shadow-[0_0_20px_rgba(239,68,68,0.4)] hover:shadow-[0_0_30px_rgba(239,68,68,0.6)]"
+                className="w-full py-2.5 rounded-[var(--radius)] bg-[var(--error)] text-white font-bold text-xs uppercase tracking-wider transition-opacity hover:opacity-90 cursor-pointer min-h-[44px]"
               >
-                Acknowledge and Refocus Gaze
+                Acknowledge and Refocus
               </button>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
-      {/* Modal: Secure Submit decision */}
+      {/* Modal: Submit Confirmation */}
       <AnimatePresence>
         {showSubmitModal && (
-          <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+          <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-black/50">
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="glass-card p-6 sm:p-8 max-w-sm w-full border border-rose-500/20 text-center glow-border"
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.12 }}
+              className="bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] p-6 max-w-sm w-full text-center shadow-lg"
             >
-              <div className="w-12 h-12 bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-rose-500/20">
+              <div className="w-12 h-12 bg-[var(--muted)] text-[var(--primary)] rounded-full flex items-center justify-center mx-auto mb-3">
                 <AlertTriangle size={22} />
               </div>
-              <h3 className="text-base font-black uppercase text-white mb-2">Finalize Grade Analysis?</h3>
-              <p className="text-xs text-zinc-400 mb-6 leading-relaxed">Once submitted, accuracy calculations compile instantly and certificate locks trigger. Confirm transaction?</p>
-              <div className="flex gap-3">
+              <h3 className="text-base font-bold text-[var(--foreground)] mb-1">Finalize Grade Analysis?</h3>
+              <p className="text-xs text-[var(--muted-foreground)] mb-5 leading-relaxed">
+                Once submitted, accuracy calculations compile instantly and certificate locks trigger. Confirm transaction?
+              </p>
+              <div className="flex gap-2.5">
                 <button 
                   onClick={() => setShowSubmitModal(false)}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 font-bold text-xs uppercase tracking-wider text-zinc-400 cursor-pointer"
+                  className="btn-secondary flex-1 py-2 text-xs min-h-[44px]"
                 >
                   Cancel
                 </button>
@@ -2421,7 +1853,7 @@ export default function App() {
                     setShowSubmitModal(false);
                     commenceScanningComputation();
                   }}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-black text-xs uppercase tracking-wider shadow-lg transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                  className="btn-primary flex-1 py-2 text-xs min-h-[44px]"
                   id="final-submission-modal-btn"
                 >
                   Confirm Transmit
@@ -2432,57 +1864,45 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Modal: Cinematic Welcome Popup before Exam Launches */}
+      {/* Modal: Welcome Popup before Exam Launches */}
       <AnimatePresence>
         {showWelcomePopup && (
-          <div className="fixed inset-0 z-[140] flex items-center justify-center p-4 bg-black/95 backdrop-blur-lg no-select">
+          <div className="fixed inset-0 z-[140] flex items-center justify-center p-4 bg-black/50">
             <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 30 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -20 }}
-              transition={{ duration: 0.4, cubicBezier: [0.16, 1, 0.3, 1] }}
-              className="glass-card max-w-md w-full p-8 border border-cyan-500/40 text-center relative overflow-hidden shadow-[0_0_50px_rgba(6,182,212,0.25)] space-y-6"
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.12 }}
+              className="bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] p-6 max-w-sm w-full text-center space-y-4 shadow-lg"
             >
-              {/* Corner accent decorations */}
-              <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-cyan-400" />
-              <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-cyan-400" />
-              <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-cyan-400" />
-              <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-cyan-400" />
-              
-              {/* Floating micro-animated launch core */}
-              <div className="relative w-20 h-20 mx-auto flex items-center justify-center bg-gradient-to-br from-cyan-500/10 to-purple-500/10 border-2 border-cyan-400/40 rounded-full shadow-[0_0_20px_rgba(6,182,212,0.2)]">
-                <motion.div
-                  className="absolute inset-0 border border-dotted border-cyan-400/50 rounded-full"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                />
-                <Sparkles size={36} className="text-cyan-400 animate-pulse" />
+              <div className="w-12 h-12 rounded-full bg-[var(--muted)] text-[var(--primary)] flex items-center justify-center mx-auto">
+                <ShieldCheck size={26} />
               </div>
 
-              <div className="space-y-2">
-                <span className="text-[10px] font-mono font-black text-cyan-400 tracking-widest uppercase bg-cyan-500/15 border border-cyan-500/30 px-3 py-1 rounded-full">
-                  COGNITIVE GATE PASSED
+              <div className="space-y-1">
+                <span className="text-[12px] font-bold text-[var(--primary)] uppercase tracking-[0.04em]">
+                  Verification Complete
                 </span>
-                <h3 className="text-2xl font-black text-white tracking-wide uppercase font-serif py-1">
-                  BEST OF LUCK, <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]">{userData.name}</span>! 🚀
+                <h3 className="text-lg font-bold text-[var(--foreground)]">
+                  Best of Luck, {userData.name}!
                 </h3>
-                <p className="text-xs font-mono text-zinc-400 leading-relaxed max-w-sm mx-auto">
-                  Your secure environment session logs are validated. Browser containment and AI anti-cheat algorithms are now operational.
+                <p className="text-xs text-[var(--muted-foreground)]">
+                  Your secure environment session logs are validated.
                 </p>
               </div>
 
-              <div className="p-4 bg-white/5 border border-white/5 rounded-2xl text-left space-y-2.5 font-mono text-[10px] text-zinc-300">
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full" />
-                  <span>TOTAL QUESTIONS: <strong className="text-white">20 ITEMS</strong></span>
+              <div className="p-3 bg-[var(--muted)]/40 border border-[var(--border)] rounded-[var(--radius)] text-left space-y-1.5 text-xs text-[var(--foreground)]">
+                <div className="flex justify-between">
+                  <span className="text-[var(--muted-foreground)]">Total Questions:</span>
+                  <span className="font-bold">20 items</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full" />
-                  <span>ALLOCATED LIMITS: <strong className="text-white">15 MINUTES TOTAL</strong></span>
+                <div className="flex justify-between">
+                  <span className="text-[var(--muted-foreground)]">Allocated Time:</span>
+                  <span className="font-bold">15 minutes</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full" />
-                  <span>PROCTOR INFRACTIONS: <strong className="text-rose-400 font-bold">3 WARNING LIMITS</strong></span>
+                <div className="flex justify-between">
+                  <span className="text-[var(--muted-foreground)]">Warning Limits:</span>
+                  <span className="font-bold text-[var(--error)]">3 infractions max</span>
                 </div>
               </div>
 
@@ -2491,12 +1911,9 @@ export default function App() {
                   synthSvc.playSwell();
                   setShowWelcomePopup(false);
                   setExamStep('quiz');
-                  if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen().catch(() => {});
-                  }
-                  triggerInstantToast("Assessment launched. Content decrypted.", "success");
+                  triggerInstantToast("Assessment launched", "success");
                 }}
-                className="w-full py-4.5 rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 text-white font-extrabold text-xs uppercase tracking-widest transition-all hover:scale-[1.03] active:scale-[0.97] hover:shadow-[0_0_30px_rgba(6,182,212,0.4)] cursor-pointer select-none border-none outline-none"
+                className="btn-primary w-full py-2.5 text-xs uppercase tracking-wider min-h-[44px]"
               >
                 Launch Assessment Matrix
               </button>
@@ -2505,30 +1922,31 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Floating System-wide chimes toasts */}
-      <div className="fixed top-24 right-6 z-[150] space-y-3 pointer-events-none max-w-sm w-full">
+      {/* Toast Notifications */}
+      <div className="fixed top-16 right-4 z-[150] space-y-2 pointer-events-none max-w-xs w-full">
         <AnimatePresence>
           {toasts.map(toast => (
             <motion.div
               key={toast.id}
-              initial={{ opacity: 0, x: 50, scale: 0.9 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 50, scale: 0.9 }}
-              className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-md border border-white/10 pointer-events-auto
-                ${toast.type === 'success' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 
-                  toast.type === 'warning' ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' : 
-                  'bg-cyan-500/20 text-cyan-400 border-cyan-500/30'}`}
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.12 }}
+              className={`p-3 rounded-[var(--radius)] shadow-md flex items-center gap-2 border pointer-events-auto text-xs font-bold
+                ${toast.type === 'success' ? 'bg-[var(--card)] text-[var(--primary)] border-[var(--primary)]' : 
+                  toast.type === 'warning' ? 'bg-[var(--card)] text-[var(--error)] border-[var(--error)]' : 
+                  'bg-[var(--card)] text-[var(--foreground)] border-[var(--border)]'}`}
             >
-              <AlertCircle size={16} className="flex-shrink-0" />
-              <span className="text-xs font-mono font-bold uppercase tracking-wide">{toast.message}</span>
+              <AlertCircle size={15} className="shrink-0" />
+              <span>{toast.message}</span>
             </motion.div>
           ))}
         </AnimatePresence>
       </div>
 
-      {/* Subtle Minimal Footer copyright */}
-      <footer className="w-full py-8 mt-16 text-center text-zinc-600 font-mono text-[10px] uppercase tracking-widest no-print select-none opacity-80 hover:opacity-100 transition-opacity duration-300 drop-shadow-[0_0_6px_rgba(0,210,255,0.18)]">
-        @2026 NS TECHNOLOGY ALL RIGHT RESERVED
+      {/* Footer */}
+      <footer className="w-full py-6 mt-12 text-center text-[var(--muted-foreground)] text-xs no-print select-none">
+        © 2026 NS Technology. All rights reserved.
       </footer>
     </div>
   );
