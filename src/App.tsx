@@ -543,7 +543,9 @@ export default function App() {
       const svgContent = `
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920" style="background: #fdfaf4; font-family: 'Fraunces', serif;">
           <rect x="40" y="40" width="1000" height="1840" rx="24" fill="#ffffff" stroke="#e2dbcd" stroke-width="3"/>
-          <text x="540" y="240" font-size="28" fill="#64748b" font-weight="700" letter-spacing="2" text-anchor="middle" font-family="'Outfit', sans-serif">NS TECHNOLOGY ASSESSMENT</text>
+          <image href="/logo.png" x="290" y="660" width="500" height="500" opacity="0.10" preserveAspectRatio="xMidYMid meet" />
+          <image href="/logo.png" x="480" y="100" width="120" height="120" preserveAspectRatio="xMidYMid meet" />
+          <text x="540" y="270" font-size="28" fill="#64748b" font-weight="700" letter-spacing="2" text-anchor="middle" font-family="'Outfit', sans-serif">NS TECHNOLOGY ASSESSMENT</text>
           <text x="540" y="440" font-size="46" fill="#1a2744" font-weight="700" text-anchor="middle">Official Exam Transcript</text>
           <line x1="200" y1="500" x2="880" y2="500" stroke="#e2dbcd" stroke-width="2"/>
           <text x="540" y="620" font-size="22" fill="#64748b" text-anchor="middle" font-family="'Outfit', sans-serif">CANDIDATE</text>
@@ -853,12 +855,14 @@ export default function App() {
       </AnimatePresence>
 
       {/* Slim, Sticky Top Header: logo + "NS TECHNOLOGY" only, background --background, bottom border --border */}
-      <header className="sticky top-0 left-0 right-0 z-40 bg-[var(--background)]/90 backdrop-blur-sm border-b border-[var(--border)] px-4 sm:px-6 py-3 flex items-center justify-between no-print shadow-none">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-[var(--radius)] bg-neutral-900 border border-neutral-800 flex items-center justify-center text-white shrink-0">
-            <Cpu size={15} />
-          </div>
-          <span className="text-sm font-semibold tracking-[0.02em] text-[var(--foreground)] uppercase whitespace-nowrap">
+      <header className="sticky top-0 left-0 right-0 z-40 bg-[var(--background)]/90 backdrop-blur-sm border-b border-[var(--border)] px-4 sm:px-6 py-2 sm:py-2.5 flex items-center justify-between no-print shadow-none">
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          <img 
+            src="/logo.png" 
+            alt="NS Technology" 
+            className="w-9 h-9 sm:w-11 sm:h-11 rounded-full object-contain shrink-0"
+          />
+          <span className="text-sm sm:text-base font-semibold tracking-[0.02em] text-[var(--foreground)] uppercase whitespace-nowrap">
             NS TECHNOLOGY
           </span>
         </div>
@@ -1450,7 +1454,7 @@ export default function App() {
                 )
               )}
 
-              {/* Step: Printable Certificate (Classic Double Border) */}
+              {/* Step: Printable Certificate (Classic Double Border with Watermark & Top Logo) */}
               {examStep === 'certificate' && (
                 <motion.div 
                   initial={{ opacity: 0 }}
@@ -1459,51 +1463,68 @@ export default function App() {
                   transition={{ duration: 0.12 }}
                   className="max-w-2xl w-full mx-auto"
                 >
-                  <div id="certificate-container" className="bg-[var(--card)] text-[var(--foreground)] rounded-2xl border-4 border-double border-[var(--border)] p-8 sm:p-12 text-center shadow-xs">
-                    <div className="flex justify-center mb-3">
-                      <div className="w-12 h-12 bg-neutral-900 text-white rounded-full flex items-center justify-center">
-                        <Trophy size={20} />
-                      </div>
-                    </div>
+                  <div 
+                    id="certificate-container" 
+                    className="bg-[var(--card)] text-[var(--foreground)] rounded-2xl border-4 border-double border-[var(--border)] p-6 sm:p-12 text-center shadow-xs relative overflow-hidden"
+                  >
+                    {/* Watermark: centered, 55-65% width, opacity ~0.10, original colors, pointer-events: none */}
+                    <img 
+                      src="/logo.png" 
+                      alt="" 
+                      aria-hidden="true" 
+                      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[58%] max-w-[360px] opacity-[0.10] pointer-events-none select-none object-contain z-0" 
+                    />
 
-                    <h1 className="text-xl sm:text-2xl font-bold tracking-tight uppercase mb-1 font-serif">
-                      Certificate of Achievement
-                    </h1>
-                    <div className="h-0.5 w-16 bg-[var(--accent)] mx-auto mb-3" />
-                    <p className="text-[11px] font-semibold tracking-[0.05em] text-[var(--muted-foreground)] uppercase">
-                      NS Technology Academics Verification
-                    </p>
-
-                    <div className="space-y-3 my-6">
-                      <p className="text-xs italic text-[var(--muted-foreground)]">This is to certify that candidate nominee</p>
-                      <h2 className="text-2xl sm:text-3xl font-bold underline underline-offset-4 decoration-[var(--border)] font-serif">
-                        {userData.name}
-                      </h2>
-                      <p className="text-xs italic text-[var(--muted-foreground)]">has successfully completed computational examinations inside portal nodes for</p>
-                      <h3 className="text-base sm:text-lg font-bold text-[var(--accent)] font-serif">
-                        {userData.course}
-                      </h3>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 my-6 text-center text-xs max-w-sm mx-auto">
-                      <div>
-                        <span className="text-[11px] text-[var(--muted-foreground)] font-semibold uppercase block">Credential ID</span>
-                        <span className="font-mono font-bold">{certificateId}</span>
+                    {/* Certificate Content above watermark */}
+                    <div className="relative z-10">
+                      {/* Small fully visible logo (56-72px) at top-center above certificate title */}
+                      <div className="flex justify-center mb-3">
+                        <img 
+                          src="/logo.png" 
+                          alt="NS Technology" 
+                          className="w-16 h-16 sm:w-18 sm:h-18 rounded-full object-contain mx-auto" 
+                        />
                       </div>
-                      <div>
-                        <span className="text-[11px] text-[var(--muted-foreground)] font-semibold uppercase block">Accuracy Achieved</span>
-                        <span className="font-mono font-bold">{percentageGradeRatio.toFixed(1)}%</span>
-                      </div>
-                    </div>
 
-                    <div className="grid grid-cols-2 gap-6 w-full items-end mt-6 pt-6 border-t border-[var(--border)] text-xs text-[var(--muted-foreground)]">
-                      <div className="text-left">
-                        <div className="font-bold text-[var(--foreground)]">NS Technology</div>
-                        <span className="text-[10px] uppercase">Board of Assessment</span>
+                      <h1 className="text-xl sm:text-2xl font-bold tracking-tight uppercase mb-1 font-serif">
+                        Certificate of Achievement
+                      </h1>
+                      <div className="h-0.5 w-16 bg-[var(--accent)] mx-auto mb-3" />
+                      <p className="text-[11px] font-semibold tracking-[0.05em] text-[var(--muted-foreground)] uppercase">
+                        NS Technology Academics Verification
+                      </p>
+
+                      <div className="space-y-3 my-6">
+                        <p className="text-xs italic text-[var(--muted-foreground)]">This is to certify that candidate nominee</p>
+                        <h2 className="text-2xl sm:text-3xl font-bold underline underline-offset-4 decoration-[var(--border)] font-serif">
+                          {userData.name}
+                        </h2>
+                        <p className="text-xs italic text-[var(--muted-foreground)]">has successfully completed computational examinations inside portal nodes for</p>
+                        <h3 className="text-base sm:text-lg font-bold text-[var(--accent)] font-serif">
+                          {userData.course}
+                        </h3>
                       </div>
-                      <div className="text-right">
-                        <div className="font-mono font-bold text-[var(--foreground)]">{userData.date}</div>
-                        <span className="text-[10px] uppercase">Date Issued</span>
+
+                      <div className="grid grid-cols-2 gap-4 my-6 text-center text-xs max-w-sm mx-auto">
+                        <div>
+                          <span className="text-[11px] text-[var(--muted-foreground)] font-semibold uppercase block">Credential ID</span>
+                          <span className="font-mono font-bold">{certificateId}</span>
+                        </div>
+                        <div>
+                          <span className="text-[11px] text-[var(--muted-foreground)] font-semibold uppercase block">Accuracy Achieved</span>
+                          <span className="font-mono font-bold">{percentageGradeRatio.toFixed(1)}%</span>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-6 w-full items-end mt-6 pt-6 border-t border-[var(--border)] text-xs text-[var(--muted-foreground)]">
+                        <div className="text-left">
+                          <div className="font-bold text-[var(--foreground)]">NS Technology</div>
+                          <span className="text-[10px] uppercase">Board of Assessment</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-mono font-bold text-[var(--foreground)]">{userData.date}</div>
+                          <span className="text-[10px] uppercase">Date Issued</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1648,7 +1669,7 @@ export default function App() {
                       <Linkedin size={14} className="text-[var(--accent)]" /> LinkedIn <ExternalLink size={10} className="opacity-50" />
                     </a>
                     <a 
-                      href="https://instagram.com/surajrawat07" 
+                      href="https://instagram.com/surajrwt07_" 
                       target="_blank" 
                       rel="noopener noreferrer" 
                       className="btn-secondary text-xs px-3.5 py-1.5 min-h-[44px]"
@@ -1657,6 +1678,19 @@ export default function App() {
                     </a>
                   </div>
                 </div>
+              </div>
+
+              {/* Instagram ID at the very bottom of FAQ */}
+              <div className="flex justify-center pt-2 pb-16 sm:pb-12">
+                <a 
+                  href="https://instagram.com/surajrwt07_" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="inline-flex items-center justify-center gap-1.5 text-[13px] sm:text-[14px] text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors min-h-[44px] px-3 py-2 cursor-pointer"
+                >
+                  <Instagram size={15} />
+                  <span>surajrwt07_</span>
+                </a>
               </div>
             </motion.div>
           )}
